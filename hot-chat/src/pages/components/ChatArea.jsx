@@ -1,8 +1,15 @@
 import React from 'react'
+import ChatHeader from './ChatHeader';
+import Messages from './Messages';
+import Send from './Send';
 
 const ChatArea = () => {
     return (
-        <div className="ChatArea w-2/3">Chat Area</div>
+        <div className="ChatArea w-2/3">
+            <ChatHeader />
+            <Messages />
+            <Send />
+        </div>
     );
 }
 

@@ -11,8 +11,8 @@ function App() {
   return (
     <>
       {/* <Signup/> */}
-      <Login />
-      {/* <Chat /> */}
+      {/* <Login /> */}
+      <Chat />
     </>
   )
 }
