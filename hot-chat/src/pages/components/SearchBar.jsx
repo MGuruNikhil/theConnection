@@ -2,14 +2,13 @@ import React from 'react'
 
 const SearchBar = () => {
     return (
-        <div className="SearchBar flex items-center">
+        <div className="SearchBar">
             <input
                 type="text"
-                className="flex-grow px-4 py-2 border border-gray-300 rounded"
+                className="w-full px-4 py-2 border border-gray-300"
                 style={{ minWidth: '0' }}
                 placeholder='Search...'
             />
-            <button className="ml-4 px-4 py-2 bg-blue-500 text-white">search</button>
         </div>
     );
 }

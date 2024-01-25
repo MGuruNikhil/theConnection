@@ -5,7 +5,7 @@ import Send from './Send';
 
 const ChatArea = () => {
     return (
-        <div className="ChatArea w-2/3">
+        <div className="ChatArea w-2/3 flex flex-col">
             <ChatHeader />
             <Messages />
             <Send />

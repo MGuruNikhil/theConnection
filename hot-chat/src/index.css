@@ -4,8 +4,8 @@
   font-weight: 400;
 
   color-scheme: light dark;
-  color: #367591;
-  background-color: #9dfdc7;
+  color: #ffffff;
+  background-color: #6B6E70;
 
   font-synthesis: none;
   text-rendering: optimizeLegibility;
@@ -36,7 +36,12 @@ body {
 h1 {
   font-size: 3.2em;
   line-height: 1.1;
-  color: #152744;
+  color: #86C232;
+}
+
+h2 {
+  font-size: 1.6em;
+  color: #61892F;
 }
 
 button {
@@ -49,9 +54,11 @@ button {
   background-color: #1a1a1a;
   cursor: pointer;
   transition: border-color 0.25s;
+  overflow: hidden;
+  color: #86C232; 
 }
 button:hover {
-  border-color: #646cff;
+  border-color: #86C232;
 }
 button:focus,
 button:focus-visible {
