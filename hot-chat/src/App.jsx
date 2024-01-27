@@ -10,9 +10,9 @@ function App() {
 
   return (
     <>
-      <Signup/>
+      {/* <Signup/> */}
       {/* <Login /> */}
-      {/* <Chat /> */}
+      <Chat />
     </>
   )
 }
