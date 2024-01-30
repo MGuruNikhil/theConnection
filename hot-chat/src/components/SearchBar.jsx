@@ -10,8 +10,8 @@ const SearchBar = () => {
                 style={{ minWidth: '0' }}
                 placeholder='Search...'
             />
-            <div className="searchResult flex flex-row p-2 justify-between border-b-solid border-b-black border-b-2 overflow-hidden">
-                <img className='rounded-[50%] object-cover' src={Dummy} alt="pp" width={'35px'} height={'35px'} />
+            <div className="searchResult max-h-[56px] flex flex-row p-2 justify-between border-b-solid border-b-black border-b-2 overflow-hidden">
+                <img className='rounded-[50%] object-cover' src={Dummy} alt="pp" width={'40px'} height={'40px'} />
                 <p className='self-center flex-1'>Display Name</p>
             </div>
         </div>
