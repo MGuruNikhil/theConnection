@@ -1,6 +1,5 @@
 import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
+import { BrowserRouter, Route, Routes } from 'react-router-dom'
 import './App.css'
 import Signup from './pages/Signup'
 import Login from './pages/Login'
@@ -9,11 +8,13 @@ import Chat from './pages/Chat'
 function App() {
 
   return (
-    <>
-      <Signup/>
-      {/* <Login /> */}
-      {/* <Chat /> */}
-    </>
+    <BrowserRouter>
+      <Routes>
+        <Route path='/' element={<Chat />} />
+        <Route path='signup' element={<Signup />} />
+        <Route path='login' element={<Login />} />
+      </Routes>
+    </BrowserRouter>
   )
 }
 

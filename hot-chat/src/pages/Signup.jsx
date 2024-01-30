@@ -1,10 +1,14 @@
 import React, { useState } from 'react'
-import { auth } from '../firebase.js'
-import { createUserWithEmailAndPassword } from "firebase/auth";
+import { auth, storage, db } from '../firebase.js'
+import { createUserWithEmailAndPassword, updateProfile } from "firebase/auth";
+import { ref, uploadBytesResumable, getDownloadURL } from "firebase/storage";
+import { doc, setDoc } from "firebase/firestore"; 
+import { Link, Navigate } from 'react-router-dom';
 
 const Signup = () => {
 
-    const [error,setError] = useState(false)
+    const [isErr,setIsErr] = useState(false);
+    const [error,setError] = useState("");
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -13,21 +17,43 @@ const Signup = () => {
         const password = e.target[2].value;
         const photo = e.target[3].files[0];
 
-        try {
-            const signupRes = await createUserWithEmailAndPassword(auth, email, password)
-                .then((userCredential) => {
-                    const user = userCredential.user;
-                    console.log(user);
-                })
-                .catch((error) => {
+        createUserWithEmailAndPassword(auth, email, password)
+            .then((userCredential) => {
+                setIsErr(false);
+                const user = userCredential.user;
+                console.log(user);
+                const storageRef = ref(storage, 'images/'+displayName+'.jpg');
+                const uploadTask = uploadBytesResumable(storageRef, photo);
+                uploadTask.on(
+                (error) => {
+                    setIsErr(true);
                     const errorCode = error.code;
                     const errorMessage = error.message;
-                    console.log(errorMessage);
-                });
-        }
-        catch(err) {
-            setError(true);
-        }
+                    setError(errorMessage);
+                }, 
+                () => {
+                    getDownloadURL(uploadTask.snapshot.ref).then(async (downloadURL) => {
+                        await updateProfile(user,{
+                            displayName,
+                            photoURL: downloadURL,
+                        });
+                        await setDoc(doc(db, "users", user.uid),{
+                            uid: user.uid,
+                            displayName,
+                            email,
+                            photoURL: downloadURL,
+                        });
+                        <Navigate to="/" replace={true} />
+                    });
+                }
+                );
+            })
+            .catch((error) => {
+                setIsErr(true);
+                const errorCode = error.code;
+                const errorMessage = error.message;
+                setError(errorMessage);
+            });
     }
 
     return (
@@ -40,9 +66,9 @@ const Signup = () => {
                 <input className='p-2 border-b-2 border-b-[#86C232] focus:outline-none' type="password" name="password" id="password" placeholder='Set password' />
                 <input type="file" name="profilePhoto" id="profilePhoto" />
                 <button>Sign Up</button>
-                {error && <span>Something went wrong</span>}
+                {isErr && <span>{error}</span>}
             </form>
-            <span>already has an account ? <a className='cursor-pointer'>Log in</a></span>
+            <span>already has an account ? <Link to="/login">Log In</Link></span>
         </div>
     );
 }
