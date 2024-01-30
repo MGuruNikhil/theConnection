@@ -85,7 +85,7 @@ const Signup = () => {
                 <button>Sign Up</button>
                 {isErr && <span>{error}</span>}
             </form>
-            <span>already has an account ? <Link to="/login">Log In</Link></span>
+            <span>already have an account ? <Link to="/login">Log In</Link></span>
         </div>
     );
 }

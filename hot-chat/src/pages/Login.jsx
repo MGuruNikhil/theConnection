@@ -1,11 +1,12 @@
 import React, { useState } from 'react'
 import { auth } from '../firebase.js'
 import { signInWithEmailAndPassword } from "firebase/auth";
-import { Link, Navigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 
 
 const Login = () => {
 
+    const navigate = useNavigate();
     const [isErr, setIsErr] = useState(false);
     const [error, setError] = useState("");
 
@@ -19,7 +20,7 @@ const Login = () => {
                 setIsErr(false); 
                 const user = userCredential.user;
                 console.log(user);
-                <Navigate to="/" replace={true} />
+                navigate("/");
             })
             .catch((error) => {
                 setIsErr(true);
@@ -38,7 +39,7 @@ const Login = () => {
             <a className='cursor-pointer'>Forgot password ?</a>
             <button>Log in</button>
             {isErr && <span>{error}</span>}
-            <span>don't has an account ? <Link to="/signup">Sign Up</Link></span>
+            <span>don't have an account ? <Link to="/signup">Sign Up</Link></span>
         </div>
     );
 }
