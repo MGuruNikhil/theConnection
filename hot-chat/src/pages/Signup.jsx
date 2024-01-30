@@ -2,13 +2,14 @@ import React, { useState } from 'react'
 import { auth, storage, db } from '../firebase.js'
 import { createUserWithEmailAndPassword, updateProfile } from "firebase/auth";
 import { ref, uploadBytesResumable, getDownloadURL } from "firebase/storage";
-import { doc, setDoc } from "firebase/firestore"; 
-import { Link, Navigate } from 'react-router-dom';
+import { doc, setDoc } from "firebase/firestore";
+import { Link, useNavigate } from 'react-router-dom';
 
 const Signup = () => {
 
-    const [isErr,setIsErr] = useState(false);
-    const [error,setError] = useState("");
+    const [isErr, setIsErr] = useState(false);
+    const [error, setError] = useState("");
+    const navigate = useNavigate();
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -22,36 +23,52 @@ const Signup = () => {
                 setIsErr(false);
                 const user = userCredential.user;
                 console.log(user);
-                const storageRef = ref(storage, 'images/'+displayName+'.jpg');
+                const storageRef = ref(storage, 'profilePics/' + displayName + '.jpg');
+                console.log(storageRef);
                 const uploadTask = uploadBytesResumable(storageRef, photo);
                 uploadTask.on(
-                (error) => {
-                    setIsErr(true);
-                    const errorCode = error.code;
-                    const errorMessage = error.message;
-                    setError(errorMessage);
-                }, 
-                () => {
-                    getDownloadURL(uploadTask.snapshot.ref).then(async (downloadURL) => {
-                        await updateProfile(user,{
-                            displayName,
-                            photoURL: downloadURL,
+                    (error) => {
+                        setIsErr(true);
+                        const errorCode = error.code;
+                        const errorMessage = error.message;
+                        console.log(errorMessage);
+                        setError(errorMessage);
+                    },
+                    () => {
+                        getDownloadURL(uploadTask.snapshot.ref).then(async(downloadURL) => {
+                            await updateProfile(user, {
+                                displayName,
+                                photoURL: downloadURL,
+                            }).catch((error) => {
+                                setIsErr(true);
+                                const errorCode = error.code;
+                                const errorMessage = error.message;
+                                console.log(errorMessage);
+                                setError(errorMessage);
+                            });
+                            await setDoc(doc(db, "users", user.uid), {
+                                uid: user.uid,
+                                displayName,
+                                email,
+                                photoURL: downloadURL,
+                            }).then(() => {
+                                navigate("/");
+                            }).catch((error) => {
+                                setIsErr(true);
+                                const errorCode = error.code;
+                                const errorMessage = error.message;
+                                console.log(errorMessage);
+                                setError(errorMessage);
+                            });
                         });
-                        await setDoc(doc(db, "users", user.uid),{
-                            uid: user.uid,
-                            displayName,
-                            email,
-                            photoURL: downloadURL,
-                        });
-                        <Navigate to="/" replace={true} />
-                    });
-                }
+                    }
                 );
             })
             .catch((error) => {
                 setIsErr(true);
                 const errorCode = error.code;
                 const errorMessage = error.message;
+                console.log(errorMessage);
                 setError(errorMessage);
             });
     }
