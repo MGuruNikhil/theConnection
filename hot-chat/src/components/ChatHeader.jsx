@@ -1,5 +1,5 @@
 import React from 'react'
-import Dummy from './Dummy.jpg'
+import Dummy from '../assets/Dummy.jpg'
 
 const ChatHeader = () => {
     return (
