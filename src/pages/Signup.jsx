@@ -23,7 +23,7 @@ const Signup = () => {
                 setIsErr(false);
                 const user = userCredential.user;
                 console.log(user);
-                const storageRef = ref(storage, 'profilePics/' + displayName + '.jpg');
+                const storageRef = ref(storage, 'profilePics/' + user.uid + '.jpg');
                 console.log(storageRef);
                 const uploadTask = uploadBytesResumable(storageRef, photo);
                 uploadTask.on(
