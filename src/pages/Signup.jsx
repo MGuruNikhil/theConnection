@@ -51,7 +51,8 @@ const Signup = () => {
                                 displayName,
                                 email,
                                 photoURL: downloadURL,
-                            }).then(() => {
+                            })
+                            .then(() => {
                                 navigate("/");
                             }).catch((error) => {
                                 setIsErr(true);
