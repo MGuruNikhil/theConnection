@@ -1,18 +1,53 @@
-import React from 'react'
-import Dummy from '../assets/Dummy.jpg'
+import React, { useContext, useEffect, useState } from 'react'
+import { AuthContext } from '../context/AuthContext';
+import { doc, getDoc, onSnapshot } from 'firebase/firestore';
+import { db } from '../firebase';
+import { ChatContext } from '../context/ChatContext';
 
 const ChatList = () => {
+    const {currentUser} = useContext(AuthContext);
+    const {setOtherUser} = useContext(ChatContext);
+    const [chatList, setChatList] = useState([]);
+    
+    useEffect(() => {
+        const renderList = async () => {
+            const unsub = onSnapshot(doc(db, "users", currentUser.uid), async (userData) => {
+                const resp = [];
+                const chatListIds = userData.data().chatList;
+                
+                const promises = chatListIds.map(async (uid) => {
+                    const docRef = doc(db, "users",uid);
+                    const docSnap = await getDoc(docRef);
+                    resp.push(docSnap.data());
+                });
+    
+                await Promise.all(promises);
+                setChatList(resp);
+            });
+            return () => {
+                unsub();
+            };
+        };
+        currentUser.uid && renderList();
+    }, [currentUser.uid]);
+    
+    const handleClick = (index) => {
+        setOtherUser(chatList[index]);
+    }
+
     return (
         <div className="ChatList flex-1 bg-[#474B4F] h-full overflow-y-scroll scrollbar-hidden">
-            <div className="activeChat max-h-[56px] flex flex-row p-2 justify-between bg-[#222629] border-b-solid border-b-black border-b-2 overflow-hidden cursor-pointer">
-                <img className='rounded-[50%] object-cover' src={Dummy} alt="pp" width={'40px'} height={'40px'} />
-                <p className='self-center flex-1'>Display Name</p>
-            </div>
-            <div className="inactiveChat max-h-[56px] flex flex-row p-2 justify-between border-b-solid border-b-black border-b-2 overflow-hidden cursor-pointer">
-                <img className='rounded-[50%] object-cover' src={Dummy} alt="pp" width={'40px'} height={'40px'} />
-                <p className='self-center flex-1'>Display Name</p>
-            </div>
+            {chatList.map((listItem, index) => (   
+                <div key={index} onClick={()=>handleClick(index)} className="inactiveChat max-h-[56px] flex flex-row p-2 justify-between border-b-solid border-b-black border-b-2 overflow-hidden cursor-pointer">
+                    <img className='rounded-[50%] object-cover' src={listItem.photoURL} alt="pp" width={'40px'} height={'40px'} />
+                    <p className='self-center flex-1'>{listItem.displayName}</p>
+                </div>
+            ))}
         </div>
+        // <div className="activeChat max-h-[56px] flex flex-row p-2 justify-between bg-[#222629] border-b-solid border-b-black border-b-2 overflow-hidden cursor-pointer">
+        //     <img className='rounded-[50%] object-cover' src={Dummy} alt="pp" width={'40px'} height={'40px'} />
+        //     <p className='self-center flex-1'>Display Name</p>
+        // </div> 
     );
 }
 
