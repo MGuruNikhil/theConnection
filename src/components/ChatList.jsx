@@ -6,7 +6,7 @@ import { ChatContext } from '../context/ChatContext';
 
 const ChatList = () => {
     const {currentUser} = useContext(AuthContext);
-    const {setOtherUser} = useContext(ChatContext);
+    const {otherUser, setOtherUser} = useContext(ChatContext);
     const [chatList, setChatList] = useState([]);
     
     useEffect(() => {
@@ -38,16 +38,12 @@ const ChatList = () => {
     return (
         <div className="ChatList flex-1 bg-[#474B4F] h-full overflow-y-scroll scrollbar-hidden">
             {chatList.map((listItem, index) => (   
-                <div key={index} onClick={()=>handleClick(index)} className="inactiveChat max-h-[56px] flex flex-row p-2 justify-between border-b-solid border-b-black border-b-2 overflow-hidden cursor-pointer">
+                <div key={index} onClick={()=>handleClick(index)} className={`${listItem.uid === otherUser?.uid ? 'bg-[#222629]' : ''} max-h-[56px] flex flex-row p-2 justify-between border-b-solid border-b-black border-b-2 overflow-hidden cursor-pointer`}>
                     <img className='rounded-[50%] object-cover' src={listItem.photoURL} alt="pp" width={'40px'} height={'40px'} />
                     <p className='self-center flex-1'>{listItem.displayName}</p>
                 </div>
             ))}
         </div>
-        // <div className="activeChat max-h-[56px] flex flex-row p-2 justify-between bg-[#222629] border-b-solid border-b-black border-b-2 overflow-hidden cursor-pointer">
-        //     <img className='rounded-[50%] object-cover' src={Dummy} alt="pp" width={'40px'} height={'40px'} />
-        //     <p className='self-center flex-1'>Display Name</p>
-        // </div> 
     );
 }
 
