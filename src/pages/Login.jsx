@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 import { auth } from '../firebase.js'
-import { signInWithEmailAndPassword } from "firebase/auth";
+import { sendPasswordResetEmail, signInWithEmailAndPassword } from "firebase/auth";
 import { Link, useNavigate } from 'react-router-dom';
 
 
@@ -16,19 +16,33 @@ const Login = () => {
         const password = e.target[1].value;
 
         signInWithEmailAndPassword(auth, email, password)
-            .then((userCredential) => {
-                setIsErr(false); 
-                const user = userCredential.user;
-                console.log(user);
-                navigate("/");
-            })
-            .catch((error) => {
-                setIsErr(true);
-                const errorCode = error.code;
-                const errorMessage = error.message;
-                setError(errorMessage);
-            });
+        .then((userCredential) => {
+            setIsErr(false); 
+            const user = userCredential.user;
+            console.log(user);
+            navigate("/");
+        })
+        .catch((error) => {
+            setIsErr(true);
+            const errorCode = error.code;
+            const errorMessage = error.message;
+            setError(errorMessage);
+        });
     }
+    
+    const handleForgotPasswordClick = (e) => {
+        e.preventDefault();
+        const email = prompt("Enter your registred email id");
+        sendPasswordResetEmail(auth, email)
+        .then(() => {
+            alert("Password reset mail is sent");
+        })
+        .catch((error) => {
+            const errorCode = error.code;
+            const errorMessage = error.message;
+            console.log(errorMessage);
+        });
+    };
 
     return (
         <div className="login p-28 bg-[#474B4F] flex flex-col space-y-5 max-w-fit m-auto border-solid border-2 rounded-lg border-[#86C232]">
@@ -37,7 +51,7 @@ const Login = () => {
             <form onSubmit={handleSubmit} className="flex flex-col space-y-5">
                 <input className='p-2 border-b-2 border-b-[#86C232] focus:outline-none' type="email" name="email" id="email" placeholder='Enter email' />
                 <input className='p-2 border-b-2 border-b-[#86C232] focus:outline-none' type="password" name="password" id="password" placeholder='Enter password' />
-                <a className='cursor-pointer'>Forgot password ?</a>
+                <a className='cursor-pointer' onClick={handleForgotPasswordClick}>Forgot password ?</a>
                 <button>Log in</button>
                 {isErr && <span>{error}</span>}
             </form>
