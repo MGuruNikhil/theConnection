@@ -19,10 +19,11 @@ const Signup = () => {
         const photo = e.target[3].files[0];
 
         createUserWithEmailAndPassword(auth, email, password)
-            .then((userCredential) => {
-                setIsErr(false);
-                const user = userCredential.user;
-                console.log(user);
+        .then( async (userCredential) => {
+            setIsErr(false);
+            const user = userCredential.user;
+            console.log(user);
+            if(photo) {
                 const storageRef = ref(storage, 'profilePics/' + user.uid + '.jpg');
                 console.log(storageRef);
                 const uploadTask = uploadBytesResumable(storageRef, photo);
@@ -64,14 +65,42 @@ const Signup = () => {
                         });
                     }
                 );
-            })
-            .catch((error) => {
-                setIsErr(true);
-                const errorCode = error.code;
-                const errorMessage = error.message;
-                console.log(errorMessage);
-                setError(errorMessage);
-            });
+            }
+            else {
+                await updateProfile(user, {
+                    displayName,
+                    photoURL: "https://firebasestorage.googleapis.com/v0/b/hotchat-nik.appspot.com/o/profilePics%2FDummy.png?alt=media&token=a39fc600-99f7-490d-a670-c23dc37e8d53",
+                }).catch((error) => {
+                    setIsErr(true);
+                    const errorCode = error.code;
+                    const errorMessage = error.message;
+                    console.log(errorMessage);
+                    setError(errorMessage);
+                });
+                await setDoc(doc(db, "users", user.uid), {
+                    uid: user.uid,
+                    displayName,
+                    email,
+                    photoURL: "https://firebasestorage.googleapis.com/v0/b/hotchat-nik.appspot.com/o/profilePics%2FDummy.png?alt=media&token=a39fc600-99f7-490d-a670-c23dc37e8d53",
+                })
+                .then(() => {
+                    navigate("/");
+                }).catch((error) => {
+                    setIsErr(true);
+                    const errorCode = error.code;
+                    const errorMessage = error.message;
+                    console.log(errorMessage);
+                    setError(errorMessage);
+                });
+            }
+        })
+        .catch((error) => {
+            setIsErr(true);
+            const errorCode = error.code;
+            const errorMessage = error.message;
+            console.log(errorMessage);
+            setError(errorMessage);
+        });
     }
 
     return (
