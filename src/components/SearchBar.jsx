@@ -2,9 +2,11 @@ import React, { useContext, useState } from 'react';
 import { db } from '../firebase';
 import { collection, getDocs, query, where, updateDoc, arrayUnion, setDoc, doc } from 'firebase/firestore';
 import { AuthContext } from '../context/AuthContext';
+import { ChatContext } from '../context/ChatContext';
 
 const SearchBar = () => {
     const {currentUser} = useContext(AuthContext);
+    const {setOtherUser} = useContext(ChatContext);
     const [searchName, setSearchName] = useState('');
     const [searchResults, setSearchResults] = useState([]);
     const [isErr, setIsErr] = useState(false);
@@ -39,6 +41,7 @@ const SearchBar = () => {
             chatList: arrayUnion(myUID)
         });
         await setDoc(doc(db,"chats",chatID),{});
+        setOtherUser(searchResults[index]);
         setSearchName("");
         setSearchResults([]);
     };
