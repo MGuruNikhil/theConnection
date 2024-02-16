@@ -105,17 +105,17 @@ const Signup = () => {
 
     return (
         <div className="signup p-20 bg-[#474B4F] flex flex-col space-y-5 max-w-fit m-auto border-solid border-2 rounded-lg border-[#86C232]">
-            <h1>hotCHAT</h1>
-            <h2>Sign Up</h2>
+            <h1 className="text-[3.2em] leading-110 text-[#86C232]">hotCHAT</h1>
+            <h2 className='text-[1.6em] text-[#61892F]'>Sign Up</h2>
             <form onSubmit={handleSubmit} className="flex flex-col space-y-5">
                 <input className='p-2 border-b-2 border-b-[#86C232] focus:outline-none' type="text" name="displayName" id="displayName" placeholder='Enter name' />
                 <input className='p-2 border-b-2 border-b-[#86C232] focus:outline-none' type="email" name="email" id="email" placeholder='Enter email' />
                 <input className='p-2 border-b-2 border-b-[#86C232] focus:outline-none' type="password" name="password" id="password" placeholder='Set password' />
                 <input type="file" name="profilePhoto" id="profilePhoto" />
-                <button>Sign Up</button>
+                <button className='rounded-md border border-transparent py-2 px-4 text-base font-semibold font-inherit bg-[#1a1a1a] cursor-pointer transition-border-color duration-250 overflow-hidden text-[#86C232] focus:outline-none focus-visible:ring-4 focus-visible:ring-auto focus-visible:ring-[#86C232] hover:border-[#86C232]'>Sign Up</button>
                 {isErr && <span>{error}</span>}
             </form>
-            <span>already have an account ? <Link to="/login">Log In</Link></span>
+            <span>already have an account ? <Link className='font-medium text-[#646cff] no-underline hover:text-[#535bf2]' to="/login">Log In</Link></span>
         </div>
     );
 }

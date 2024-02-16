@@ -1,14 +1,43 @@
 <!doctype html>
-<html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="./src/assets/hotChat.png" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>hotCHAT</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-  </head>
-  <body>
-    <div id="root"></div>
-    <script type="module" src="/src/main.jsx"></script>
-  </body>
+<html class="font-inter leading-6 font-normal text-white bg-[#6B6E70] antialiased"
+  style="font-synthesis: none; text-rendering: optimizeLegibility; -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; height: 100vh; color-scheme: light dark;">
+
+<head>
+  <meta charset="UTF-8" />
+  <link rel="icon" type="image/svg+xml" href="./src/assets/hotChat.png" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>hotCHAT</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    .scrollbar-hidden::-webkit-scrollbar {
+      display: none;
+    }
+
+    .scrollbar-hidden {
+      scrollbar-width: none;
+      -ms-overflow-style: none;
+    }
+    
+    @media (prefers-color-scheme: light) {
+      :root {
+        color: #213547;
+        background-color: #ffffff;
+      }
+
+      a:hover {
+        color: #747bff;
+      }
+
+      button {
+        background-color: #f9f9f9;
+      }
+    }
+  </style>
+</head>
+
+<body class="m-0 flex items-center min-w-[320px] min-h-screen">
+  <div id="root" class="mx-auto p-8 text-center w-screen h-screen flex items-center justify-center"></div>
+  <script type="module" src="/src/main.jsx"></script>
+</body>
+
 </html>

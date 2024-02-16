@@ -26,7 +26,7 @@ const SideHeader = () => {
         <div className="SideHeader max-h-[56px] flex flex-row p-2 justify-between bg-[#61892F] overflow-hidden">
             <img src={photoURL} alt="pp" width={'40px'} height={'40px'} className='rounded-[50%] object-cover hover:border-[1px] hover:border-solid hover:border-[#86C232] cursor-pointer' />
             <p className='self-center'>{displayName}</p>
-            <button onClick={handleLogout} className='h-[40px] w-[40px] px-1 py-2 bg-inherit rounded-full focus:outline-none flex items-center justify-center'>
+            <button onClick={handleLogout} className='border border-transparent text-base font-semibold font-inherit cursor-pointer transition-border-color duration-250 overflow-hidden text-[#86C232] focus-visible:ring-4 focus-visible:ring-auto focus-visible:ring-[#86C232] hover:border-[#86C232] h-[40px] w-[40px] px-1 py-2 bg-inherit rounded-full focus:outline-none flex items-center justify-center'>
                 <img src={logOutIcon} width={20} height={20} alt="log out" />
             </button>
         </div>

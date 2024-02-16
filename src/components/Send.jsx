@@ -32,7 +32,7 @@ const Send = () => {
                 value={message}
                 onChange={(e) => setMessage(e.target.value)}
             />
-            <button onClick={handleSend} className="send">Send</button>
+            <button onClick={handleSend} className="send rounded-md border border-transparent py-2 px-4 text-base font-semibold font-inherit bg-[#1a1a1a] cursor-pointer transition-border-color duration-250 overflow-hidden text-[#86C232] focus:outline-none focus-visible:ring-4 focus-visible:ring-auto focus-visible:ring-[#86C232] hover:border-[#86C232]">Send</button>
         </div>
     );
 }
