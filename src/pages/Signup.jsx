@@ -112,7 +112,7 @@ const Signup = () => {
                 <input className='p-2 border-b-2 border-b-[#86C232] focus:outline-none' type="text" name="displayName" id="displayName" placeholder='Enter name' />
                 <input className='p-2 border-b-2 border-b-[#86C232] focus:outline-none' type="email" name="email" id="email" placeholder='Enter email' />
                 <input className='p-2 border-b-2 border-b-[#86C232] focus:outline-none' type="password" name="password" id="password" placeholder='Set password' />
-                <label htmlFor="profilePhoto" className='flex gap-2'>
+                <label htmlFor="profilePhoto" className='flex gap-2 cursor-pointer'>
                     <img src={addPP} alt="pp" />
                     <span>Add a profile pic</span>
                 </label>
