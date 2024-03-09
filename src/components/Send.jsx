@@ -26,13 +26,18 @@ const Send = () => {
         <div className="Send w-full flex flex-row bg-[#000000]">
             <input
                 type="text"
-                className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none"
+                className="flex-1 px-4 py-2 focus:outline-none"
                 style={{ minWidth: '0' }}
                 placeholder='Type here...'
                 value={message}
                 onChange={(e) => setMessage(e.target.value)}
+                onKeyDown={(e) => {
+                    if (e.key === 'Enter') {
+                        handleSend();
+                    }
+                }}
             />
-            <button onClick={handleSend} className="send rounded-md border border-transparent py-2 px-4 text-base font-semibold font-inherit bg-[#1a1a1a] cursor-pointer transition-border-color duration-250 overflow-hidden text-[#86C232] focus:outline-none focus-visible:ring-4 focus-visible:ring-auto focus-visible:ring-[#86C232] hover:border-[#86C232]">Send</button>
+            <button onClick={handleSend} className="send rounded-r-md border border-transparent py-2 px-4 text-base font-semibold font-inherit bg-[#1a1a1a] cursor-pointer transition-border-color duration-250 overflow-hidden text-[#86C232] focus:outline-none focus-visible:ring-4 focus-visible:ring-auto focus-visible:ring-[#86C232] hover:border-[#86C232]">Send</button>
         </div>
     );
 }
