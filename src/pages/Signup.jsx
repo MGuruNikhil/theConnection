@@ -4,6 +4,7 @@ import { createUserWithEmailAndPassword, updateProfile } from "firebase/auth";
 import { ref, uploadBytesResumable, getDownloadURL } from "firebase/storage";
 import { doc, setDoc } from "firebase/firestore";
 import { Link, useNavigate } from 'react-router-dom';
+import addPP from '../assets/addPP.png'
 
 const Signup = () => {
 
@@ -111,7 +112,11 @@ const Signup = () => {
                 <input className='p-2 border-b-2 border-b-[#86C232] focus:outline-none' type="text" name="displayName" id="displayName" placeholder='Enter name' />
                 <input className='p-2 border-b-2 border-b-[#86C232] focus:outline-none' type="email" name="email" id="email" placeholder='Enter email' />
                 <input className='p-2 border-b-2 border-b-[#86C232] focus:outline-none' type="password" name="password" id="password" placeholder='Set password' />
-                <input type="file" name="profilePhoto" id="profilePhoto" />
+                <label htmlFor="profilePhoto" className='flex gap-2'>
+                    <img src={addPP} alt="pp" />
+                    <span>Add a profile pic</span>
+                </label>
+                <input className="hidden" type="file" name="profilePhoto" id="profilePhoto"/>
                 <button className='rounded-md border border-transparent py-2 px-4 text-base font-semibold font-inherit bg-[#1a1a1a] cursor-pointer transition-border-color duration-250 overflow-hidden text-[#86C232] focus:outline-none focus-visible:ring-4 focus-visible:ring-auto focus-visible:ring-[#86C232] hover:border-[#86C232]'>Sign Up</button>
                 {isErr && <span>{error}</span>}
             </form>
