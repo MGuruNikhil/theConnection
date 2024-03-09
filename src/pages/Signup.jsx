@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 import { auth, storage, db } from '../firebase.js'
-import { createUserWithEmailAndPassword, updateProfile } from "firebase/auth";
+import { createUserWithEmailAndPassword, updateProfile, sendEmailVerification } from "firebase/auth";
 import { ref, uploadBytesResumable, getDownloadURL } from "firebase/storage";
 import { doc, setDoc } from "firebase/firestore";
 import { Link, useNavigate } from 'react-router-dom';
@@ -55,7 +55,11 @@ const Signup = () => {
                                 photoURL: downloadURL,
                             })
                             .then(() => {
-                                navigate("/");
+                                sendEmailVerification(auth.currentUser)
+                                .then(() => {
+                                    alert("Email verification link sent, verify your email before logging in");
+                                    navigate("/login");
+                                });
                             }).catch((error) => {
                                 setIsErr(true);
                                 const errorCode = error.code;
@@ -85,7 +89,11 @@ const Signup = () => {
                     photoURL: "https://firebasestorage.googleapis.com/v0/b/hotchat-nik.appspot.com/o/profilePics%2FDummy.png?alt=media&token=a39fc600-99f7-490d-a670-c23dc37e8d53",
                 })
                 .then(() => {
-                    navigate("/");
+                    sendEmailVerification(auth.currentUser)
+                    .then(() => {
+                        alert("Email verification link sent, verify your email before logging in");
+                        navigate("/login");
+                    });
                 }).catch((error) => {
                     setIsErr(true);
                     const errorCode = error.code;

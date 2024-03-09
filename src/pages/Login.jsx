@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 import { auth } from '../firebase.js'
-import { sendPasswordResetEmail, signInWithEmailAndPassword } from "firebase/auth";
+import { sendPasswordResetEmail, signInWithEmailAndPassword, signOut } from "firebase/auth";
 import { Link, useNavigate } from 'react-router-dom';
 
 
@@ -19,8 +19,22 @@ const Login = () => {
         .then((userCredential) => {
             setIsErr(false); 
             const user = userCredential.user;
-            console.log(user);
-            navigate("/");
+            if(user.emailVerified) {
+                navigate("/");
+            }
+            else {
+                alert("Please complete email verification, verification link already sent to ", user.email);
+                signOut(auth)
+                .then(() => {
+                    console.log('User logged out successfully');
+                })
+                .catch((error) => {
+                    setIsErr(true);
+                    const errorCode = error.code;
+                    const errorMessage = error.message;
+                    setError(errorMessage);
+                });
+            }
         })
         .catch((error) => {
             setIsErr(true);
@@ -38,9 +52,10 @@ const Login = () => {
             alert("Password reset mail is sent");
         })
         .catch((error) => {
+            setIsErr(true);
             const errorCode = error.code;
             const errorMessage = error.message;
-            console.log(errorMessage);
+            setError(errorMessage);
         });
     };
 
