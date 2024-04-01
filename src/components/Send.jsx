@@ -1,26 +1,28 @@
 import React, { useContext, useState } from 'react'
 import { AuthContext } from '../context/AuthContext';
 import { ChatContext } from '../context/ChatContext';
-import { Timestamp, arrayUnion, doc, updateDoc } from "firebase/firestore"; 
+import { Timestamp, arrayUnion, doc, updateDoc } from "firebase/firestore";
 import { db } from '../firebase';
 import { v4 as uuidv4 } from 'uuid';
 
 const Send = () => {
-    const {currentUser} = useContext(AuthContext);
-    const {otherUser} = useContext(ChatContext);
-    const ChatID = (currentUser.uid < otherUser?.uid)?(currentUser.uid+"-"+otherUser?.uid):(otherUser?.uid+"-"+currentUser.uid);
+    const { currentUser } = useContext(AuthContext);
+    const { otherUser } = useContext(ChatContext);
+    const ChatID = (currentUser.uid < otherUser?.uid) ? (currentUser.uid + "-" + otherUser?.uid) : (otherUser?.uid + "-" + currentUser.uid);
     const messageRef = doc(db, "chats", ChatID);
     const [message, setMessage] = useState('');
     const handleSend = async () => {
-        await updateDoc(messageRef, {
-            messages: arrayUnion({
-                id: uuidv4(),
-                from: currentUser.uid,
-                message,
-                timeStamp: Timestamp.now(),
-            }),
-        });        
-        setMessage('');          
+        if (message != '') {
+            await updateDoc(messageRef, {
+                messages: arrayUnion({
+                    id: uuidv4(),
+                    from: currentUser.uid,
+                    message,
+                    timeStamp: Timestamp.now(),
+                }),
+            });
+            setMessage('');
+        }
     }
     return (
         <div className="Send w-full flex flex-row bg-[#000000]">
