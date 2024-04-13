@@ -6,6 +6,7 @@ import Chat from './pages/Chat'
 import { AuthContext } from './context/AuthContext'
 import { signOut } from 'firebase/auth'
 import { auth } from './firebase'
+import Profile from './pages/Profile'
 
 function App() {
 
@@ -35,6 +36,11 @@ function App() {
             <Chat />
           </AuthProtection>
         } />
+        <Route path='/profile' element={
+          <AuthProtection>
+            <Profile />
+          </AuthProtection>
+        }/>
         <Route path='signup' element={<Signup />} />
         <Route path='login' element={<Login />} />
       </Routes>

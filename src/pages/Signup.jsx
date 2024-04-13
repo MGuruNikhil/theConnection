@@ -16,8 +16,9 @@ const Signup = () => {
         e.preventDefault();
         const displayName = e.target[0].value;
         const email = e.target[1].value;
-        const password = e.target[2].value;
-        const photo = e.target[3].files[0];
+        const phoneNumber = e.target[2].value;
+        const password = e.target[3].value;
+        const photo = e.target[4].files[0];
 
         createUserWithEmailAndPassword(auth, email, password)
         .then( async (userCredential) => {
@@ -41,6 +42,7 @@ const Signup = () => {
                             await updateProfile(user, {
                                 displayName,
                                 photoURL: downloadURL,
+                                phoneNumber,
                             }).catch((error) => {
                                 setIsErr(true);
                                 const errorCode = error.code;
@@ -52,6 +54,7 @@ const Signup = () => {
                                 uid: user.uid,
                                 displayName,
                                 email,
+                                phoneNumber,
                                 photoURL: downloadURL,
                             })
                             .then(() => {
@@ -75,6 +78,7 @@ const Signup = () => {
                 await updateProfile(user, {
                     displayName,
                     photoURL: "https://firebasestorage.googleapis.com/v0/b/hotchat-nik.appspot.com/o/profilePics%2FDummy.png?alt=media&token=a39fc600-99f7-490d-a670-c23dc37e8d53",
+                    phoneNumber,
                 }).catch((error) => {
                     setIsErr(true);
                     const errorCode = error.code;
@@ -86,6 +90,7 @@ const Signup = () => {
                     uid: user.uid,
                     displayName,
                     email,
+                    phoneNumber,
                     photoURL: "https://firebasestorage.googleapis.com/v0/b/hotchat-nik.appspot.com/o/profilePics%2FDummy.png?alt=media&token=a39fc600-99f7-490d-a670-c23dc37e8d53",
                 })
                 .then(() => {
@@ -119,6 +124,7 @@ const Signup = () => {
             <form onSubmit={handleSubmit} className="flex flex-col space-y-5">
                 <input className='p-2 border-b-2 border-b-[#86C232] focus:outline-none' type="text" name="displayName" id="displayName" placeholder='Enter name' />
                 <input className='p-2 border-b-2 border-b-[#86C232] focus:outline-none' type="email" name="email" id="email" placeholder='Enter email' />
+                <input className='p-2 border-b-2 border-b-[#86C232] focus:outline-none' type="text" name="phoneNumber" id='phoneNumber' placeholder='Enter phone number'/>
                 <input className='p-2 border-b-2 border-b-[#86C232] focus:outline-none' type="password" name="password" id="password" placeholder='Set password' />
                 <label htmlFor="profilePhoto" className='flex gap-2 cursor-pointer'>
                     <img src={addPP} alt="pp" />
