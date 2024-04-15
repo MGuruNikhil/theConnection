@@ -3,6 +3,7 @@ import { AuthContext } from "../context/AuthContext";
 import logOutIcon from '../assets/logout.png';
 import { auth } from "../firebase";
 import { signOut } from "firebase/auth";
+import EditableComp from "../components/EditableComps";
 
 const Profile = () => {
 
@@ -24,14 +25,15 @@ const Profile = () => {
     };
 
     return (
-        <div className="p-20 bg-[#474B4F] flex flex-col items-center space-y-5 max-w-fit m-auto border-solid border-2 rounded-lg border-[#86C232]">
-            <img src={currentUser.photoURL} className='rounded-[50%] w-[100px] h-[100px] object-cover'  alt="pp" />
-            <h2 className='text-[1.6em] text-[#61892F]'>{currentUser.displayName}</h2>
-            <p>Email id : {currentUser.email}</p>
-            <p>Phone Number : {currentUser.phoneNumber||"-"}</p>
+        <div className="p-16 bg-[#474B4F] flex flex-col items-center space-y-5 w-[50%] h-full m-auto border-solid border-2 rounded-lg border-[#86C232]">
+            <img src={currentUser.photoURL} className='rounded-full w-[200px] h-[200px] object-cover'  alt="pp" />
+            <EditableComp label="Display Name" value={currentUser.displayName} key="displayName" />
+            <EditableComp label="Email id" value={currentUser.email} key="email" />
+            <EditableComp label="Phone Number" value={currentUser.phoneNumber||"-"} key="phoneNumber" />
             <div className="flex flex-row gap-2">
-                <button onClick={handleLogout} className='border border-transparent text-base font-semibold font-inherit cursor-pointer transition-border-color duration-250 overflow-hidden text-[#86C232] focus-visible:ring-4 focus-visible:ring-auto focus-visible:ring-[#86C232] hover:border-[#86C232] h-[40px] w-[40px] px-1 py-2 bg-inherit rounded-full focus:outline-none flex items-center justify-center'>
+                <button onClick={handleLogout} className='gap-2 border border-transparent text-base font-semibold font-inherit cursor-pointer transition-border-color duration-250 overflow-hidden text-[#86C232] focus-visible:ring-4 focus-visible:ring-auto focus-visible:ring-[#86C232] hover:border-[#86C232] h-[40px] px-2 py-4 bg-inherit rounded-full focus:outline-none flex items-center justify-center'>
                     <img src={logOutIcon} width={20} height={20} alt="log out" />
+                    Log Out
                 </button>
             </div>
         </div>
