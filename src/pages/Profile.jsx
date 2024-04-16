@@ -25,7 +25,7 @@ const Profile = () => {
     };
 
     return (
-        <div className="p-16 bg-[#474B4F] flex flex-col items-center space-y-5 w-[50%] h-full m-auto border-solid border-2 rounded-lg border-[#86C232]">
+        <div className="p-16 bg-[#474B4F] flex flex-col items-center w-[50%] h-full m-auto border-solid border-2 rounded-lg border-[#86C232]">
             <img src={currentUser.photoURL} className='rounded-full w-[200px] h-[200px] object-cover'  alt="pp" />
             <EditableComp label="Display Name" value={currentUser.displayName} key="displayName" />
             <EditableComp label="Email id" value={currentUser.email} key="email" />
