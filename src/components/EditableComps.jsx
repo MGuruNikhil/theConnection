@@ -5,7 +5,6 @@ import { doc, updateDoc } from "firebase/firestore";
 import { auth, db, storage } from "../firebase";
 import { AuthContext } from "../context/AuthContext";
 import { updateProfile } from "firebase/auth"
-import { useNavigate } from "react-router-dom";
 
 
 const EditableComp = (props) => {
