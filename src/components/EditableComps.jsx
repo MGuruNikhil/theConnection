@@ -1,19 +1,40 @@
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useContext } from "react";
 import Edit from "../assets/edit.png"
 import Close from "../assets/close.png"
+import { doc, updateDoc } from "firebase/firestore";
+import { auth, db, storage } from "../firebase";
+import { AuthContext } from "../context/AuthContext";
+import { updateProfile } from "firebase/auth"
+import { useNavigate } from "react-router-dom";
 
 
 const EditableComp = (props) => {
 
+    const { currentUser } = useContext(AuthContext);
     const [isEdit, setIsEdit] = useState(false);
-
     const [editedText, setEditedText] = useState((props.value != '-')?props.value:'');
-
     const inputRef = useRef(null);
 
     const handleClick = () => {
         setIsEdit(prev =>!prev);
     };
+
+    const handleSubmit = async (e) => {
+        if (e.code === 'Enter') {
+            if (props.fbkey !== 'phoneNumber' && editedText === "") {
+                alert("This field cannot be empty");
+                return;
+            }
+            const docRef = doc(db, "users", currentUser.uid);
+            const updateData = {};
+            updateData[props.fbkey] = editedText;
+            console.log(updateData);
+            await updateProfile(currentUser, updateData);
+            await updateDoc(docRef, updateData);
+            window.location.reload();
+        }
+    };
+    
 
     useEffect(() => {
         if (isEdit && inputRef.current) {
@@ -33,7 +54,8 @@ const EditableComp = (props) => {
                     className="flex-grow rounded-md p-[2px] focus:outline-none focus:ring-2 focus:ring-[#86C232] h-[100%]" 
                     type="text" 
                     name={props.fbkey} 
-                    id={props.fbkey} 
+                    id={props.fbkey}
+                    onKeyDown={handleSubmit}
                 /> 
             }
             <button onClick={handleClick}>
