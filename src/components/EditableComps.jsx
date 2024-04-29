@@ -11,7 +11,7 @@ const EditableComp = (props) => {
 
     const { currentUser } = useContext(AuthContext);
     const [isEdit, setIsEdit] = useState(false);
-    const [editedText, setEditedText] = useState((props.value != '-')?props.value:'');
+    const [editedText, setEditedText] = useState(currentUser[props.fbkey]);
     const inputRef = useRef(null);
 
     const handleClick = () => {
@@ -20,7 +20,7 @@ const EditableComp = (props) => {
 
     const handleSubmit = async (e) => {
         if (e.code === 'Enter') {
-            if (props.fbkey !== 'phoneNumber' && editedText === "") {
+            if (editedText === "") {
                 alert("This field cannot be empty");
                 return;
             }
@@ -30,7 +30,7 @@ const EditableComp = (props) => {
             console.log(updateData);
             await updateProfile(currentUser, updateData);
             await updateDoc(docRef, updateData);
-            window.location.reload();
+            setIsEdit(prev =>!prev);
         }
     };
     
@@ -44,7 +44,7 @@ const EditableComp = (props) => {
     return (
         <div className="flex items-center justify-between w-[70%] p-2 h-[50px] gap-2">
             <p className="flex-shrink-0 inline-block whitespace-no-wrap text-[#ffffff] text-semibold">{props.label} :</p>
-            {!isEdit? <span className="text-[#86C232] text-bold">{props.value}</span> : 
+            {!isEdit? <span className="text-[#86C232] text-bold">{currentUser[props.fbkey]}</span> : 
                 <input 
                     ref={inputRef} 
                     style={{ minWidth: '0' }} 
@@ -58,7 +58,7 @@ const EditableComp = (props) => {
                 /> 
             }
             <button onClick={handleClick}>
-                <img src={!isEdit? Edit : Close} width={20} height={20} alt="edit" />
+                <img src={!isEdit? Edit : Close} width={30} height={30} alt="edit" />
             </button>
         </div>
     )
