@@ -2,7 +2,7 @@ import { useState, useRef, useEffect, useContext } from "react";
 import Edit from "../assets/edit.png"
 import Close from "../assets/close.png"
 import { doc, updateDoc } from "firebase/firestore";
-import { auth, db, storage } from "../firebase";
+import { db } from "../firebase";
 import { AuthContext } from "../context/AuthContext";
 import { updateProfile } from "firebase/auth"
 

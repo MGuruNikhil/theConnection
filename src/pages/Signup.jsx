@@ -26,7 +26,6 @@ const Signup = () => {
             console.log(user);
             if(photo) {
                 const storageRef = ref(storage, 'profilePics/' + user.uid + '.jpg');
-                console.log(storageRef);
                 const uploadTask = uploadBytesResumable(storageRef, photo);
                 uploadTask.on(
                     (error) => {
@@ -124,7 +123,7 @@ const Signup = () => {
                     <img src={addPP} alt="pp" />
                     <span>Add a profile pic</span>
                 </label>
-                <input className="hidden" type="file" name="profilePhoto" id="profilePhoto"/>
+                <input className="hidden" type="file" accept="image/*" name="profilePhoto" id="profilePhoto"/>
                 <button className='rounded-md border border-transparent py-2 px-4 text-base font-semibold font-inherit bg-[#1a1a1a] cursor-pointer transition-border-color duration-250 overflow-hidden text-[#86C232] focus:outline-none focus-visible:ring-4 focus-visible:ring-auto focus-visible:ring-[#86C232] hover:border-[#86C232]'>Sign Up</button>
                 {isErr && <span>{error}</span>}
             </form>
