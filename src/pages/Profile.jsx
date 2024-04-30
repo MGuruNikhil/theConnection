@@ -94,19 +94,19 @@ const Profile = () => {
     }
 
     const handleDelAcc = async () => {
-        deleteObject(ref(storage, 'profilePics/' + currentUser.uid + '.jpg'))
-            .catch((error) => {
-                const errorCode = error.code;
-                const errorMessage = error.message;
-                console.log(errorMessage);
-            });
-        const docRef = doc(db, "users", currentUser.uid);
-        const docSnap = await getDoc(docRef);
-        if (docSnap.exists()) {
-            const chatList = docSnap.data().chatList;
-        } else {
-            console.log("No such document!");
-        }
+        // deleteObject(ref(storage, 'profilePics/' + currentUser.uid + '.jpg'))
+        //     .catch((error) => {
+        //         const errorCode = error.code;
+        //         const errorMessage = error.message;
+        //         console.log(errorMessage);
+        //     });
+        // const docRef = doc(db, "users", currentUser.uid);
+        // const docSnap = await getDoc(docRef);
+        // if (docSnap.exists()) {
+        //     const chatList = docSnap.data().chatList;
+        // } else {
+        //     console.log("No such document!");
+        // }
     }
 
     return (
