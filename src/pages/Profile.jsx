@@ -4,11 +4,12 @@ import logOutIcon from '../assets/logout.png';
 import { auth, storage, db } from "../firebase";
 import { signOut, updateProfile } from "firebase/auth";
 import { ref, uploadBytesResumable, getDownloadURL, deleteObject } from "firebase/storage";
-import { doc, updateDoc } from "firebase/firestore";
+import { doc, updateDoc, getDoc } from "firebase/firestore";
 import EditableComp from "../components/EditableComps";
 import Back from "../assets/arrow.png";
 import Edit from "../assets/edit.png";
-import Close from "../assets/close.png"
+import Close from "../assets/close.png";
+import Delete from "../assets/delete-user.png";
 import { useNavigate } from "react-router-dom";
 
 const Profile = () => {
@@ -43,7 +44,7 @@ const Profile = () => {
                 (error) => {
                     const errorCode = error.code;
                     const errorMessage = error.message;
-                    console.log(errorMessage); 
+                    console.log(errorMessage);
                 },
                 () => {
                     getDownloadURL(uploadTask.snapshot.ref).then(async (downloadURL) => {
@@ -69,12 +70,12 @@ const Profile = () => {
     }
 
     const handleRemovePP = async () => {
-        deleteObject(ref(storage, 'profilePics/'+currentUser.uid+'.jpg'))
-        .catch((error) => {
-            const errorCode = error.code;
-            const errorMessage = error.message;
-            console.log(errorMessage);
-        });
+        deleteObject(ref(storage, 'profilePics/' + currentUser.uid + '.jpg'))
+            .catch((error) => {
+                const errorCode = error.code;
+                const errorMessage = error.message;
+                console.log(errorMessage);
+            });
         await updateProfile(currentUser, {
             photoURL: "https://firebasestorage.googleapis.com/v0/b/hotchat-nik.appspot.com/o/profilePics%2FDummy.png?alt=media&token=a39fc600-99f7-490d-a670-c23dc37e8d53",
         }).catch((error) => {
@@ -92,8 +93,24 @@ const Profile = () => {
         setShowButton(false);
     }
 
+    const handleDelAcc = async () => {
+        deleteObject(ref(storage, 'profilePics/' + currentUser.uid + '.jpg'))
+            .catch((error) => {
+                const errorCode = error.code;
+                const errorMessage = error.message;
+                console.log(errorMessage);
+            });
+        const docRef = doc(db, "users", currentUser.uid);
+        const docSnap = await getDoc(docRef);
+        if (docSnap.exists()) {
+            const chatList = docSnap.data().chatList;
+        } else {
+            console.log("No such document!");
+        }
+    }
+
     return (
-        <div className="min-w-[350px] relative bg-[#474B4F] flex flex-col justify-center items-center w-[50%] h-full m-auto border-solid border-2 rounded-lg border-[#86C232]">
+        <div className="min-w-[350px] relative bg-[#474B4F] flex flex-col justify-center items-center w-[50%] h-full m-auto border-solid border-2 rounded-lg border-[#86C232] gap-4">
 
             <button onClick={() => { navigate("/") }} className="absolute top-2 left-2 z-10 bg-[#86C232] rounded-full cursor-pointer p-2 flex items-center justify-center"><img src={Back} width={20} height={20} alt="log out" /></button>
 
@@ -126,8 +143,12 @@ const Profile = () => {
             {/* <EditableComp label="Email id" fbkey="email" /> */}
 
             <div className="flex flex-row gap-2">
+                <button onClick={handleDelAcc} className='gap-2 border border-transparent text-base font-semibold font-inherit cursor-pointer transition-border-color duration-250 overflow-hidden text-[#86C232] focus-visible:ring-4 focus-visible:ring-auto focus-visible:ring-[#86C232] hover:border-[#86C232] h-[40px] px-2 py-4 bg-inherit rounded-full focus:outline-none flex items-center justify-center'>
+                    <img src={Delete} width={30} height={30} alt="delete account" />
+                    Delete Account
+                </button>
                 <button onClick={handleLogout} className='gap-2 border border-transparent text-base font-semibold font-inherit cursor-pointer transition-border-color duration-250 overflow-hidden text-[#86C232] focus-visible:ring-4 focus-visible:ring-auto focus-visible:ring-[#86C232] hover:border-[#86C232] h-[40px] px-2 py-4 bg-inherit rounded-full focus:outline-none flex items-center justify-center'>
-                    <img src={logOutIcon} width={20} height={20} alt="log out" />
+                    <img src={logOutIcon} width={30} height={30} alt="log out" />
                     Log Out
                 </button>
             </div>
