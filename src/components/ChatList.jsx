@@ -14,15 +14,16 @@ const ChatList = () => {
             const unsub = onSnapshot(doc(db, "users", currentUser.uid), async (userData) => {
                 const resp = [];
                 const chatListIds = userData.data().chatList;
-                
-                const promises = chatListIds.map(async (uid) => {
-                    const docRef = doc(db, "users",uid);
-                    const docSnap = await getDoc(docRef);
-                    resp.push(docSnap.data());
-                });
-    
-                await Promise.all(promises);
-                setChatList(resp);
+
+                if(chatListIds) {
+                    const promises = chatListIds.map(async (uid) => {
+                        const docRef = doc(db, "users",uid);
+                        const docSnap = await getDoc(docRef);
+                        resp.push(docSnap.data());
+                    });
+                    await Promise.all(promises);
+                    setChatList(resp);
+                }
             });
             return () => {
                 unsub();
