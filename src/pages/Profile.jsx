@@ -2,9 +2,9 @@ import { useContext, useState } from "react";
 import { AuthContext } from "../context/AuthContext";
 import logOutIcon from '../assets/logout.png';
 import { auth, storage, db } from "../firebase";
-import { signOut, updateProfile } from "firebase/auth";
+import { deleteUser, reauthenticateWithCredential, signOut, updateProfile, EmailAuthProvider } from "firebase/auth";
 import { ref, uploadBytesResumable, getDownloadURL, deleteObject } from "firebase/storage";
-import { doc, updateDoc, getDoc } from "firebase/firestore";
+import { doc, updateDoc, getDoc, arrayRemove, deleteDoc } from "firebase/firestore";
 import EditableComp from "../components/EditableComps";
 import Back from "../assets/arrow.png";
 import Edit from "../assets/edit.png";
@@ -70,11 +70,23 @@ const Profile = () => {
     }
 
     const handleRemovePP = async () => {
-        deleteObject(ref(storage, 'profilePics/' + currentUser.uid + '.jpg'))
+        const fileRef = ref(storage, 'profilePics/' + currentUser.uid + '.jpg');
+        getDownloadURL(fileRef)
+            .then(() => {
+                deleteObject(fileRef)
+                    .then(() => {
+                        console.log("File deleted successfully");
+                    })
+                    .catch((error) => {
+                        console.error("Error deleting file:", error);
+                    });
+            })
             .catch((error) => {
-                const errorCode = error.code;
-                const errorMessage = error.message;
-                console.log(errorMessage);
+                if (error.code === "storage/object-not-found") {
+                    console.log("File does not exist");
+                } else {
+                    console.error("Error fetching download URL:", error);
+                }
             });
         await updateProfile(currentUser, {
             photoURL: "https://firebasestorage.googleapis.com/v0/b/hotchat-nik.appspot.com/o/profilePics%2FDummy.png?alt=media&token=a39fc600-99f7-490d-a670-c23dc37e8d53",
@@ -93,20 +105,70 @@ const Profile = () => {
         setShowButton(false);
     }
 
+
+    const promptForCredentials = () => {
+        const email = currentUser.email;
+        const password = prompt("To delete your account, enter password : ");
+        return EmailAuthProvider.credential(email, password);
+    }
+
     const handleDelAcc = async () => {
-        // deleteObject(ref(storage, 'profilePics/' + currentUser.uid + '.jpg'))
-        //     .catch((error) => {
-        //         const errorCode = error.code;
-        //         const errorMessage = error.message;
-        //         console.log(errorMessage);
-        //     });
-        // const docRef = doc(db, "users", currentUser.uid);
-        // const docSnap = await getDoc(docRef);
-        // if (docSnap.exists()) {
-        //     const chatList = docSnap.data().chatList;
-        // } else {
-        //     console.log("No such document!");
-        // }
+        const confirmDelAcc = window.confirm('Are you sure you want to delete your account ?');
+        if (confirmDelAcc) {
+            const credential = promptForCredentials();
+
+            reauthenticateWithCredential(currentUser, credential).then(async () => {
+                const fileRef = ref(storage, 'profilePics/' + currentUser.uid + '.jpg');
+
+                getDownloadURL(fileRef)
+                    .then(() => {
+                        // File exists, proceed with deletion
+                        deleteObject(fileRef)
+                            .then(() => {
+                                console.log("File deleted successfully");
+                            })
+                            .catch((error) => {
+                                console.error("Error deleting file:", error);
+                            });
+                    })
+                    .catch((error) => {
+                        if (error.code === "storage/object-not-found") {
+                            console.log("File does not exist");
+                        } else {
+                            console.error("Error fetching download URL:", error);
+                        }
+                    });
+                const docRef = doc(db, "users", currentUser.uid);
+                const docSnap = await getDoc(docRef);
+                let chatList;
+                if (docSnap.exists()) {
+                    chatList = docSnap.data().chatList;
+                    for (let i = 0; i < chatList.length; i++) {
+                        const chatID = (currentUser.uid < chatList[i]) ? (currentUser.uid + "-" + chatList[i]) : (chatList[i] + "-" + currentUser.uid);
+                        await updateDoc(doc(db, "users", chatList[i]), {
+                            chatList: arrayRemove(currentUser.uid)
+                        });
+                        await deleteDoc(doc(db, "chat", chatID));
+                    }
+                    await deleteDoc(doc(db, "users", currentUser.uid));
+                } else {
+                    console.log("No such document!");
+                }
+                await deleteUser(currentUser)
+                    .then(() => {
+                        console.log("Account Deleted Successfully")
+                    })
+                    .catch((error) => {
+                        const errorCode = error.code;
+                        const errorMessage = error.message;
+                        console.log(errorMessage);
+                    });
+            }).catch((error) => {
+                const errorCode = error.code;
+                const errorMessage = error.message;
+                console.log(errorMessage);
+            });
+        }
     }
 
     return (
