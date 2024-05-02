@@ -5,19 +5,19 @@ import { db } from '../firebase';
 import { ChatContext } from '../context/ChatContext';
 
 const ChatList = () => {
-    const {currentUser} = useContext(AuthContext);
-    const {otherUser, setOtherUser} = useContext(ChatContext);
+    const { currentUser } = useContext(AuthContext);
+    const { otherUser, setOtherUser } = useContext(ChatContext);
     const [chatList, setChatList] = useState([]);
-    
+
     useEffect(() => {
         const renderList = async () => {
             const unsub = onSnapshot(doc(db, "users", currentUser.uid), async (userData) => {
                 const resp = [];
                 const chatListIds = userData.data().chatList;
 
-                if(chatListIds) {
+                if (chatListIds) {
                     const promises = chatListIds.map(async (uid) => {
-                        const docRef = doc(db, "users",uid);
+                        const docRef = doc(db, "users", uid);
                         const docSnap = await getDoc(docRef);
                         resp.push(docSnap.data());
                     });
@@ -31,19 +31,23 @@ const ChatList = () => {
         };
         currentUser.uid && renderList();
     }, [currentUser.uid]);
-    
+
     const handleClick = (index) => {
         setOtherUser(chatList[index]);
     }
 
     return (
         <div className="ChatList flex-1 bg-[#474B4F] h-full overflow-y-scroll scrollbar-hidden">
-            {chatList && chatList.map((listItem, index) => (   
-                <div key={index} onClick={()=>handleClick(index)} className={`${listItem.uid === otherUser?.uid ? 'bg-[#222629]' : ''} h-[56px] flex flex-row p-2 justify-between border-b-solid border-b-black border-b-[1px] overflow-hidden cursor-pointer`}>
+            {(chatList.length !=0) ? chatList.map((listItem, index) => (
+                <div key={index} onClick={() => handleClick(index)} className={`${listItem.uid === otherUser?.uid ? 'bg-[#222629]' : ''} h-[56px] flex flex-row p-2 justify-between border-b-solid border-b-black border-b-[1px] overflow-hidden cursor-pointer`}>
                     <img className='rounded-[50%] object-cover' src={listItem.photoURL} alt="pp" width={'40px'} height={'40px'} />
                     <p className='self-center flex-1'>{listItem.displayName}</p>
                 </div>
-            ))}
+            )) : <div className='h-full w-full flex flex-col items-center justify-center p-2'>
+                    <p>Chat with other users by searching their names or Email IDs in the search bar.</p>
+                    <p>Give it a try.</p> 
+                </div>
+            }
         </div>
     );
 }
