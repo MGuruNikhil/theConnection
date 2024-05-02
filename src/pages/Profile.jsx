@@ -5,7 +5,7 @@ import { auth, storage, db } from "../firebase";
 import { deleteUser, reauthenticateWithCredential, signOut, updateProfile, EmailAuthProvider } from "firebase/auth";
 import { ref, uploadBytesResumable, getDownloadURL, deleteObject } from "firebase/storage";
 import { doc, updateDoc, getDoc, arrayRemove, deleteDoc } from "firebase/firestore";
-import EditableComp from "../components/EditableComps";
+import EditDisplayName from "../components/EditDisplayName";
 import Back from "../assets/arrow.png";
 import Edit from "../assets/edit.png";
 import Close from "../assets/close.png";
@@ -195,7 +195,7 @@ const Profile = () => {
 
             </div>
 
-            <EditableComp label="Display Name" fbkey="displayName" />
+            <EditDisplayName label="Display Name" fbkey="displayName" />
 
             <div className="flex items-center w-[70%] p-2 h-[50px]">
                 <p className="flex-shrink-0 inline-block whitespace-no-wrap text-[#ffffff] text-semibold">Email :</p>

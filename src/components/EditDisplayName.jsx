@@ -7,16 +7,27 @@ import { AuthContext } from "../context/AuthContext";
 import { updateProfile } from "firebase/auth"
 
 
-const EditableComp = (props) => {
+const EditDisplayName = (props) => {
 
     const { currentUser } = useContext(AuthContext);
     const [isEdit, setIsEdit] = useState(false);
-    const [editedText, setEditedText] = useState(currentUser[props.fbkey]);
+    const [editedText, setEditedText] = useState(currentUser["displayName"]);
     const inputRef = useRef(null);
 
     const handleClick = () => {
         setIsEdit(prev =>!prev);
     };
+
+    function getAllSubstrings(str) {
+        const lowerCaseStr = str.toLowerCase();
+        const result = [];
+        for (let i = 0; i < lowerCaseStr.length; i++) {
+            for (let j = i + 1; j <= lowerCaseStr.length; j++) {
+                result.push(lowerCaseStr.substring(i, j));
+            }
+        }
+        return result;
+    }
 
     const handleSubmit = async (e) => {
         if (e.code === 'Enter') {
@@ -26,7 +37,8 @@ const EditableComp = (props) => {
             }
             const docRef = doc(db, "users", currentUser.uid);
             const updateData = {};
-            updateData[props.fbkey] = editedText;
+            updateData["displayName"] = editedText;
+            updateData["searchNames"] = getAllSubstrings(editedText);
             console.log(updateData);
             await updateProfile(currentUser, updateData);
             await updateDoc(docRef, updateData);
@@ -43,8 +55,8 @@ const EditableComp = (props) => {
 
     return (
         <div className="flex items-center justify-between w-[70%] p-2 h-[50px] gap-2">
-            <p className="flex-shrink-0 inline-block whitespace-no-wrap text-[#ffffff] text-semibold">{props.label} :</p>
-            {!isEdit? <span className="text-[#86C232] text-bold">{currentUser[props.fbkey]}</span> : 
+            <p className="flex-shrink-0 inline-block whitespace-no-wrap text-[#ffffff] text-semibold">Display Name :</p>
+            {!isEdit? <span className="text-[#86C232] text-bold">{currentUser["displayName"]}</span> : 
                 <input 
                     ref={inputRef} 
                     style={{ minWidth: '0' }} 
@@ -52,8 +64,8 @@ const EditableComp = (props) => {
                     value={editedText} 
                     className="flex-grow rounded-md p-[2px] focus:outline-none focus:ring-2 focus:ring-[#86C232] h-[100%]" 
                     type="text" 
-                    name={props.fbkey} 
-                    id={props.fbkey}
+                    name="displayName"
+                    id="displayName"
                     onKeyDown={handleSubmit}
                 /> 
             }
@@ -64,4 +76,4 @@ const EditableComp = (props) => {
     )
 }
 
-export default EditableComp;
+export default EditDisplayName;
