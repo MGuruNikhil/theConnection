@@ -10,10 +10,12 @@ const SearchBar = () => {
     const [searchName, setSearchName] = useState('');
     const [searchResults, setSearchResults] = useState([]);
     const [isErr, setIsErr] = useState(false);
+    const [isFocus, setIsFocus] = useState(false);
 
     const handleSubmit = async (e) => {
         if (e.code === 'Enter') {
-            const q = query(collection(db, 'users'), where('displayName', '==', searchName));
+            const lowerSname = searchName.toLowerCase();
+            const q = query(collection(db, 'users'), where('searchNames', 'array-contains', lowerSname));
             try {
                 const querySnapshot = await getDocs(q);
                 const results = [];
@@ -21,6 +23,9 @@ const SearchBar = () => {
                     results.push(doc.data());
                 });
                 console.log(results);
+                if(results.length ==0) {
+                    setIsErr(true);
+                }
                 setSearchResults(results);
             } catch (error) {
                 console.log(error.message);
@@ -54,10 +59,12 @@ const SearchBar = () => {
                 style={{ minWidth: '0' }}
                 placeholder="Search..."
                 onChange={(e) => setSearchName(e.target.value)}
+                onFocus={() => {setIsFocus(true)}}
+                onBlur={() => {setIsFocus(false);setIsErr(false);setSearchName('');setSearchResults([])}}
                 onKeyDown={handleSubmit}
                 value={searchName}
             />
-            {searchResults && searchResults.map((result, index) => (
+            {(searchResults.length !=0) && searchResults.map((result, index) => (
                 <div key={index} onClick={() => handleResultClick(index)} className="resultItem max-h-[56px] flex flex-row p-2 gap-x-2 border-b-solid border-b-black border-b-2 overflow-hidden cursor-pointer">
                     <img className="rounded-[50%] object-cover" src={result.photoURL} alt="pp" width={'40px'} height={'40px'} />
                     <div className="info flex flex-col items-start justify-center">
@@ -66,7 +73,7 @@ const SearchBar = () => {
                     </div>
                 </div>
             ))}
-            {isErr && <span>No user found</span>}
+            {(isErr && isFocus) && <span>No user found</span>}
         </div>
     );
 };

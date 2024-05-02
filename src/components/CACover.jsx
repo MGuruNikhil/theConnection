@@ -9,6 +9,7 @@ const CACover = () => {
             <p className='text-3xl'>Hay <span className='font-bold text-[#86C232]'>{currentUser.displayName}</span></p>
             <p className='text-sm'>You can search for other people in the app to chat</p>
             <p className='text-xs'>Just try it out using search bar</p>
+            <button>Change DB</button>
         </div>
     );
 }

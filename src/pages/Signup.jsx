@@ -12,6 +12,17 @@ const Signup = () => {
     const [error, setError] = useState("");
     const navigate = useNavigate();
 
+    function getAllSubstrings(str) {
+        const lowerCaseStr = str.toLowerCase();
+        const result = [];
+        for (let i = 0; i < lowerCaseStr.length; i++) {
+            for (let j = i + 1; j <= lowerCaseStr.length; j++) {
+                result.push(lowerCaseStr.substring(i, j));
+            }
+        }
+        return result;
+    }
+
     const handleSubmit = async (e) => {
         e.preventDefault();
         const displayName = e.target[0].value;
@@ -20,95 +31,98 @@ const Signup = () => {
         const photo = e.target[3].files[0];
 
         createUserWithEmailAndPassword(auth, email, password)
-        .then( async (userCredential) => {
-            setIsErr(false);
-            const user = userCredential.user;
-            console.log(user);
-            if(photo) {
-                const storageRef = ref(storage, 'profilePics/' + user.uid + '.jpg');
-                const uploadTask = uploadBytesResumable(storageRef, photo);
-                uploadTask.on(
-                    (error) => {
+            .then(async (userCredential) => {
+                setIsErr(false);
+                const user = userCredential.user;
+                console.log(user);
+                const searchNames = getAllSubstrings(displayName);
+                if (photo) {
+                    const storageRef = ref(storage, 'profilePics/' + user.uid + '.jpg');
+                    const uploadTask = uploadBytesResumable(storageRef, photo);
+                    uploadTask.on(
+                        (error) => {
+                            setIsErr(true);
+                            const errorCode = error.code;
+                            const errorMessage = error.message;
+                            console.log(errorMessage);
+                            setError(errorMessage);
+                        },
+                        () => {
+                            getDownloadURL(uploadTask.snapshot.ref).then(async (downloadURL) => {
+                                await updateProfile(user, {
+                                    displayName,
+                                    photoURL: downloadURL,
+                                }).catch((error) => {
+                                    setIsErr(true);
+                                    const errorCode = error.code;
+                                    const errorMessage = error.message;
+                                    console.log(errorMessage);
+                                    setError(errorMessage);
+                                });
+                                await setDoc(doc(db, "users", user.uid), {
+                                    uid: user.uid,
+                                    displayName,
+                                    email,
+                                    photoURL: downloadURL,
+                                    searchNames,
+                                })
+                                    .then(() => {
+                                        sendEmailVerification(auth.currentUser)
+                                            .then(() => {
+                                                alert("Email verification link sent, verify your email before logging in");
+                                                navigate("/login");
+                                            });
+                                    }).catch((error) => {
+                                        setIsErr(true);
+                                        const errorCode = error.code;
+                                        const errorMessage = error.message;
+                                        console.log(errorMessage);
+                                        setError(errorMessage);
+                                    });
+                            });
+                        }
+                    );
+                }
+                else {
+                    await updateProfile(user, {
+                        displayName,
+                        photoURL: "https://firebasestorage.googleapis.com/v0/b/hotchat-nik.appspot.com/o/profilePics%2FDummy.png?alt=media&token=a39fc600-99f7-490d-a670-c23dc37e8d53",
+                    }).catch((error) => {
                         setIsErr(true);
                         const errorCode = error.code;
                         const errorMessage = error.message;
                         console.log(errorMessage);
                         setError(errorMessage);
-                    },
-                    () => {
-                        getDownloadURL(uploadTask.snapshot.ref).then(async(downloadURL) => {
-                            await updateProfile(user, {
-                                displayName,
-                                photoURL: downloadURL,
-                            }).catch((error) => {
-                                setIsErr(true);
-                                const errorCode = error.code;
-                                const errorMessage = error.message;
-                                console.log(errorMessage);
-                                setError(errorMessage);
-                            });
-                            await setDoc(doc(db, "users", user.uid), {
-                                uid: user.uid,
-                                displayName,
-                                email,
-                                photoURL: downloadURL,
-                            })
-                            .then(() => {
-                                sendEmailVerification(auth.currentUser)
+                    });
+                    await setDoc(doc(db, "users", user.uid), {
+                        uid: user.uid,
+                        displayName,
+                        email,
+                        photoURL: "https://firebasestorage.googleapis.com/v0/b/hotchat-nik.appspot.com/o/profilePics%2FDummy.png?alt=media&token=a39fc600-99f7-490d-a670-c23dc37e8d53",
+                        searchNames,
+                    })
+                        .then(() => {
+                            sendEmailVerification(auth.currentUser)
                                 .then(() => {
                                     alert("Email verification link sent, verify your email before logging in");
                                     navigate("/login");
                                 });
-                            }).catch((error) => {
-                                setIsErr(true);
-                                const errorCode = error.code;
-                                const errorMessage = error.message;
-                                console.log(errorMessage);
-                                setError(errorMessage);
-                            });
+                        }).catch((error) => {
+                            setIsErr(true);
+                            const errorCode = error.code;
+                            const errorMessage = error.message;
+                            console.log(errorMessage);
+                            setError(errorMessage);
                         });
-                    }
-                );
-            }
-            else {
-                await updateProfile(user, {
-                    displayName,
-                    photoURL: "https://firebasestorage.googleapis.com/v0/b/hotchat-nik.appspot.com/o/profilePics%2FDummy.png?alt=media&token=a39fc600-99f7-490d-a670-c23dc37e8d53",
-                }).catch((error) => {
-                    setIsErr(true);
-                    const errorCode = error.code;
-                    const errorMessage = error.message;
-                    console.log(errorMessage);
-                    setError(errorMessage);
-                });
-                await setDoc(doc(db, "users", user.uid), {
-                    uid: user.uid,
-                    displayName,
-                    email,
-                    photoURL: "https://firebasestorage.googleapis.com/v0/b/hotchat-nik.appspot.com/o/profilePics%2FDummy.png?alt=media&token=a39fc600-99f7-490d-a670-c23dc37e8d53",
-                })
-                .then(() => {
-                    sendEmailVerification(auth.currentUser)
-                    .then(() => {
-                        alert("Email verification link sent, verify your email before logging in");
-                        navigate("/login");
-                    });
-                }).catch((error) => {
-                    setIsErr(true);
-                    const errorCode = error.code;
-                    const errorMessage = error.message;
-                    console.log(errorMessage);
-                    setError(errorMessage);
-                });
-            }
-        })
-        .catch((error) => {
-            setIsErr(true);
-            const errorCode = error.code;
-            const errorMessage = error.message;
-            console.log(errorMessage);
-            setError(errorMessage);
-        });
+                }
+            })
+            .catch((error) => {
+                setIsErr(true);
+                const errorCode = error.code;
+                const errorMessage = error.message;
+                console.log(errorMessage);
+                setError(errorMessage);
+            });
     }
 
     return (
@@ -123,7 +137,7 @@ const Signup = () => {
                     <img src={addPP} alt="pp" />
                     <span>Add a profile pic</span>
                 </label>
-                <input className="hidden" type="file" accept="image/*" name="profilePhoto" id="profilePhoto"/>
+                <input className="hidden" type="file" accept="image/*" name="profilePhoto" id="profilePhoto" />
                 <button className='rounded-md border border-transparent py-2 px-4 text-base font-semibold font-inherit bg-[#1a1a1a] cursor-pointer transition-border-color duration-250 overflow-hidden text-[#86C232] focus:outline-none focus-visible:ring-4 focus-visible:ring-auto focus-visible:ring-[#86C232] hover:border-[#86C232]'>Sign Up</button>
                 {isErr && <span>{error}</span>}
             </form>
