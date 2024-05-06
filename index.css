@@ -22,7 +22,7 @@
     height: 100vh;
 }
 
-input[type="text"] {
+input[type="text"], input[type="email"], input[type="password"], input[type="number"] {
     background-color: #2B2A33;
     min-width: 232px;
 }
