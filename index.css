@@ -24,6 +24,7 @@
 
 input {
     background-color: #2B2A33;
+    min-width: 232px;
 }
 
 a:hover {
@@ -34,9 +35,10 @@ a:hover {
     #root {
         padding: 0;
     }
-    .login {
+    .login, .profile, .signup {
         height: 100%;
         width: 100%;
         max-width: 100%;
+        min-width: none;
     }
 }
