@@ -11,7 +11,7 @@ const ChatArea = () => {
     const {otherUser} = useContext(ChatContext);
     if(otherUser) {
         return (
-            <div className="ChatArea w-2/3 flex flex-col">
+            <div className="ChatArea relative w-2/3 flex flex-col">
                 <ChatHeader />
                 <Messages />
                 <Send />
@@ -20,7 +20,7 @@ const ChatArea = () => {
     }
     else {
         return (
-            <div className="ChatArea w-2/3 flex flex-col">
+            <div className="ChatArea relative w-2/3 flex flex-col">
                 <CACover />
             </div>
         );
