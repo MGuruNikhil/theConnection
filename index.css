@@ -22,7 +22,7 @@
     height: 100vh;
 }
 
-input {
+input[type="text"] {
     background-color: #2B2A33;
     min-width: 232px;
 }
@@ -35,10 +35,18 @@ a:hover {
     #root {
         padding: 0;
     }
-    .login, .profile, .signup {
+    .login, .profile, .signup, .container {
         height: 100%;
         width: 100%;
         max-width: 100%;
-        min-width: none;
+        min-width: 0px;
+    }
+}
+
+@media screen and (max-width: 768px) {
+    .Sidebar, .ChatArea {
+        width: 100%;
+        height: 100%;
+        border-right: none;
     }
 }
