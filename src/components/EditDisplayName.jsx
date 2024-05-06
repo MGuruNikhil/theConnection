@@ -7,7 +7,7 @@ import { AuthContext } from "../context/AuthContext";
 import { updateProfile } from "firebase/auth"
 
 
-const EditDisplayName = (props) => {
+const EditDisplayName = () => {
 
     const { currentUser } = useContext(AuthContext);
     const [isEdit, setIsEdit] = useState(false);

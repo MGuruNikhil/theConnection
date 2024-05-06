@@ -205,11 +205,11 @@ const Profile = () => {
             {/* <EditableComp label="Email id" fbkey="email" /> */}
 
             <div className="flex flex-row gap-2">
-                <button onClick={handleDelAcc} className='gap-2 border border-transparent text-base font-semibold font-inherit cursor-pointer transition-border-color duration-250 overflow-hidden text-black focus-visible:ring-4 focus-visible:ring-auto focus-visible:ring-[#842029] bg-[#DC3545] h-[40px] px-4 py-2 bg-inherit rounded-full focus:outline-none flex items-center justify-center'>
+                <button onClick={handleDelAcc} className='gap-2 border border-transparent text-base font-semibold cursor-pointer transition-border-color duration-250 overflow-hidden text-black focus-visible:ring-4 focus-visible:ring-auto focus-visible:ring-[#842029] bg-[#DC3545] h-[40px] px-4 py-2 rounded-full focus:outline-none flex items-center justify-center'>
                     <img src={Delete} width={30} height={30} alt="delete account" />
                     Delete Account
                 </button>
-                <button onClick={handleLogout} className='gap-2 border border-transparent text-base font-semibold font-inherit cursor-pointer transition-border-color duration-250 overflow-hidden text-black focus-visible:ring-4 focus-visible:ring-auto focus-visible:ring-[#997404] bg-[#FFC107] h-[40px] px-4 py-2 bg-inherit rounded-full focus:outline-none flex items-center justify-center'>
+                <button onClick={handleLogout} className='gap-2 border border-transparent text-base font-semibold cursor-pointer transition-border-color duration-250 overflow-hidden text-black focus-visible:ring-4 focus-visible:ring-auto focus-visible:ring-[#997404] bg-[#FFC107] h-[40px] px-4 py-2 rounded-full focus:outline-none flex items-center justify-center'>
                     <img src={logOutIcon} width={30} height={30} alt="log out" />
                     Log Out
                 </button>

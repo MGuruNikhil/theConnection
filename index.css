@@ -11,24 +11,32 @@
     -ms-overflow-style: none;
 }
 
-@media (prefers-color-scheme: dark) {
-    :root {
-        color: #ffffff;
-        background-color: #6B6E70;
-        font-synthesis: none;
-        line-height: 1.5rem;
-        text-rendering: optimizeLegibility;
-        -webkit-font-smoothing: antialiased;
-        -moz-osx-font-smoothing: grayscale;
-        height: 100vh;
-        color-scheme: light dark;
-    }
+:root {
+    color: #ffffff;
+    background-color: #6B6E70;
+    font-synthesis: none;
+    line-height: 1.5rem;
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    height: 100vh;
+}
 
-    a:hover {
-        color: #747bff;
-    }
+input {
+    background-color: #2B2A33;
+}
 
-    button {
-        background-color: #f9f9f9;
+a:hover {
+    color: #747bff;
+}
+
+@media screen and (max-width: 480px) {
+    #root {
+        padding: 0;
+    }
+    .login {
+        height: 100%;
+        width: 100%;
+        max-width: 100%;
     }
 }
