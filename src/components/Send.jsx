@@ -25,7 +25,7 @@ const Send = () => {
         }
     }
     return (
-        <div className="Send absolute bottom-0 w-full flex flex-row bg-[#000000]">
+        <div className="Send w-full flex flex-row bg-[#000000]">
             <input
                 type="text"
                 className="flex-1 px-4 py-2 focus:outline-none"

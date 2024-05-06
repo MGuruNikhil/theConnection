@@ -41,6 +41,15 @@ a:hover {
         max-width: 100%;
         min-width: 0px;
     }
+    .Send {
+        position: fixed;
+        bottom: 0;
+        right: 0;
+        left: 0;
+        border: 2px solid #86C232;
+        border-top: none;
+        border-radius: 0.5rem;
+    }
 }
 
 @media screen and (max-width: 768px) {
