@@ -2,6 +2,17 @@
 @tailwind components;
 @tailwind utilities;
 
+input:-webkit-autofill,
+input:-webkit-autofill:hover, 
+input:-webkit-autofill:focus, 
+input:-webkit-autofill:active{
+    -webkit-box-shadow: 0 0 0 30px #2B2A33 inset !important;
+}
+
+input:-webkit-autofill{
+    -webkit-text-fill-color: #ffffff !important;
+}
+
 .scrollbar-hidden::-webkit-scrollbar {
     display: none;
 }

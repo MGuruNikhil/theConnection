@@ -25,7 +25,7 @@ const Messages = () => {
     return (
         <div className="Messages flex-1 bg-gray-950 flex flex-col gap-2 overflow-scroll p-2 scrollbar-hidden">
             {chats && chats.map((chat, index) => (  
-                <div key={index} className={`bg-[#86C232] max-w-[90%] ${chat.from === currentUser.uid ? 'place-self-end rounded-tr-none' : 'place-self-start rounded-tl-none'} px-4 py-2 rounded-xl text-start`}>{chat.message}</div>
+                <div key={index} className={`break-words bg-[#86C232] max-w-[90%] ${chat.from === currentUser.uid ? 'place-self-end rounded-tr-none' : 'place-self-start rounded-tl-none'} px-4 py-2 rounded-xl text-start`}>{chat.message}</div>
             ))}
         </div>
     );
