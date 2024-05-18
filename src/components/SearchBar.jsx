@@ -19,40 +19,38 @@ const SearchBar = () => {
         setSearchFilter(event.target.value);
     };
 
-    const handleSubmit = async (e) => {
-        if (e.code === 'Enter') {
-            let q;
-            if (searchFilter === "displayName") {
-                const lowerSname = searchName.toLowerCase();
-                q = query(collection(db, 'users'), where('searchNames', 'array-contains', lowerSname));
+    const handleSubmit = async () => {
+        let q;
+        if (searchFilter === "displayName") {
+            const lowerSname = searchName.toLowerCase();
+            q = query(collection(db, 'users'), where('searchNames', 'array-contains', lowerSname));
+        }
+        else {
+            const emailPattern = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+            const isValid = emailPattern.test(searchName);
+            if (!isValid) {
+                setIsErr(true);
+                setErrMsg("Invalid Email ID");
+                return;
             }
-            else {
-                const emailPattern = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
-                const isValid = emailPattern.test(searchName);
-                if (!isValid) {
-                    setIsErr(true);
-                    setErrMsg("Invalid Email ID");
-                    return;
-                }
-                q = query(collection(db, "users"), where("email", "==", searchName));
-            }
-            try {
-                const querySnapshot = await getDocs(q);
-                const results = [];
-                querySnapshot.forEach((doc) => {
-                    results.push(doc.data());
-                });
-                console.log(results);
-                if (results.length == 0) {
-                    setIsErr(true);
-                    setErrMsg("No user found");
-                }
-                setSearchResults(results);
-            } catch (error) {
-                console.log(error.message);
+            q = query(collection(db, "users"), where("email", "==", searchName));
+        }
+        try {
+            const querySnapshot = await getDocs(q);
+            const results = [];
+            querySnapshot.forEach((doc) => {
+                results.push(doc.data());
+            });
+            console.log(results);
+            if (results.length == 0) {
                 setIsErr(true);
                 setErrMsg("No user found");
             }
+            setSearchResults(results);
+        } catch (error) {
+            console.log(error.message);
+            setIsErr(true);
+            setErrMsg("No user found");
         }
     };
 
@@ -88,7 +86,11 @@ const SearchBar = () => {
                     placeholder={(isFocus ? ((searchFilter === "displayName") ? "Search by name" : "Search by email") : "Search...")}
                     onChange={(e) => setSearchName(e.target.value)}
                     onFocus={() => { setIsFocus(true) }}
-                    onKeyDown={handleSubmit}
+                    onKeyDown={(e) => {
+                        if (e.key === 'Enter') {
+                            handleSubmit();
+                        }
+                    }}
                     value={searchName}
                 />
             </div>
