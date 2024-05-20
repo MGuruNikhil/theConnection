@@ -57,6 +57,7 @@ const SearchBar = () => {
                 setErrMsg("No user found");
             }
         } else {
+            setSearchResults([]);
             setIsErr(true);
             setErrMsg("Search for some user");
         }
@@ -93,7 +94,7 @@ const SearchBar = () => {
                     style={{ minWidth: '0' }}
                     placeholder={(isFocus ? ((searchFilter === "displayName") ? "Search by name" : "Search by email") : "Search...")}
                     onChange={(e) => setSearchName(e.target.value)}
-                    onFocus={() => { setIsFocus(true); setIsErr(true); }}
+                    onFocus={() => { if(!isFocus) { setIsErr(true); setErrMsg("Search for some user"); setIsFocus(true);} }}
                     onKeyDown={(e) => {
                         if (e.key === 'Enter') {
                             handleSubmit();
