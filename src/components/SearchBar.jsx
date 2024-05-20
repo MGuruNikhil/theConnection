@@ -1,56 +1,64 @@
-import React, { useContext, useState } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import { db } from '../firebase';
 import { collection, getDocs, query, where, updateDoc, arrayUnion, setDoc, doc } from 'firebase/firestore';
 import { AuthContext } from '../context/AuthContext';
 import { ChatContext } from '../context/ChatContext';
 import Back from "../assets/back.png"
+import FullWidthTabs from '../materialUI/FullWidthTabs';
 
 const SearchBar = () => {
     const { currentUser } = useContext(AuthContext);
     const { setOtherUser } = useContext(ChatContext);
     const [searchName, setSearchName] = useState('');
     const [searchResults, setSearchResults] = useState([]);
-    const [isErr, setIsErr] = useState(false);
-    const [errMsg, setErrMsg] = useState('No user found');
+    const [isErr, setIsErr] = useState(true);
+    const [errMsg, setErrMsg] = useState('Search for some user');
     const [isFocus, setIsFocus] = useState(false);
     const [searchFilter, setSearchFilter] = useState('displayName');
 
-    const handleRadioChange = (event) => {
-        setSearchFilter(event.target.value);
-    };
+    useEffect(() => {
+        handleSubmit();
+    }, [searchFilter])
 
     const handleSubmit = async () => {
-        let q;
-        if (searchFilter === "displayName") {
-            const lowerSname = searchName.toLowerCase();
-            q = query(collection(db, 'users'), where('searchNames', 'array-contains', lowerSname));
-        }
-        else {
-            const emailPattern = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
-            const isValid = emailPattern.test(searchName);
-            if (!isValid) {
-                setIsErr(true);
-                setErrMsg("Invalid Email ID");
-                return;
+        if (searchName.length > 0) {
+            setSearchResults([]);
+            setIsErr(false);
+            let q;
+            if (searchFilter === "displayName") {
+                const lowerSname = searchName.toLowerCase();
+                q = query(collection(db, 'users'), where('searchNames', 'array-contains', lowerSname));
             }
-            q = query(collection(db, "users"), where("email", "==", searchName));
-        }
-        try {
-            const querySnapshot = await getDocs(q);
-            const results = [];
-            querySnapshot.forEach((doc) => {
-                results.push(doc.data());
-            });
-            console.log(results);
-            if (results.length == 0) {
+            else {
+                const emailPattern = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+                const isValid = emailPattern.test(searchName);
+                if (!isValid) {
+                    setIsErr(true);
+                    setErrMsg("Invalid Email ID");
+                    return;
+                }
+                q = query(collection(db, "users"), where("email", "==", searchName));
+            }
+            try {
+                const querySnapshot = await getDocs(q);
+                const results = [];
+                querySnapshot.forEach((doc) => {
+                    results.push(doc.data());
+                });
+                console.log(results);
+                if (results.length == 0) {
+                    setIsErr(true);
+                    setErrMsg("No user found");
+                }
+                setSearchResults(results);
+            } catch (error) {
+                console.log(error.message);
                 setIsErr(true);
                 setErrMsg("No user found");
             }
-            setSearchResults(results);
-        } catch (error) {
-            console.log(error.message);
+        } else {
             setIsErr(true);
-            setErrMsg("No user found");
+            setErrMsg("Search for some user");
         }
     };
 
@@ -95,41 +103,45 @@ const SearchBar = () => {
                 />
             </div>
             {(isFocus) &&
-                <div className='flex justify-between p-2'>
-                    <div className='flex gap-2'>
-                        <input
-                            type="radio"
-                            name="searchFilter"
-                            id="displayName"
-                            value="displayName"
-                            checked={searchFilter === 'displayName'}
-                            onChange={handleRadioChange}
-                        />
-                        <label htmlFor="displayName">Name</label>
-                    </div>
-                    <div className='flex gap-2'>
-                        <input
-                            type="radio"
-                            name="searchFilter"
-                            id="email"
-                            value="email"
-                            checked={searchFilter === 'email'}
-                            onChange={handleRadioChange}
-                        />
-                        <label htmlFor="email">Email</label>
-                    </div>
-                </div>
+                // <div className='felx flex-col w-full'>
+                //     <div className='flex justify-between p-2'>
+                //         <div className='flex gap-2'>
+                //             <input
+                //                 type="radio"
+                //                 name="searchFilter"
+                //                 id="displayName"
+                //                 value="displayName"
+                //                 checked={searchFilter === 'displayName'}
+                //                 onChange={handleRadioChange}
+                //             />
+                //             <label htmlFor="displayName">Name</label>
+                //         </div>
+                //         <div className='flex gap-2'>
+                //             <input
+                //                 type="radio"
+                //                 name="searchFilter"
+                //                 id="email"
+                //                 value="email"
+                //                 checked={searchFilter === 'email'}
+                //                 onChange={handleRadioChange}
+                //             />
+                //             <label htmlFor="email">Email</label>
+                //         </div>
+                //     </div>
+                    // {(searchResults.length != 0) && searchResults.map((result, index) => (
+                    //     <div key={index} onClick={() => handleResultClick(index)} className="resultItem max-h-[56px] flex flex-row p-2 gap-x-2 border-b-solid border-b-black border-b-2 overflow-hidden cursor-pointer">
+                    //         <img className="rounded-[50%] object-cover" src={result.photoURL} alt="pp" width={'40px'} height={'40px'} />
+                    //         <div className="info flex flex-col items-start justify-center">
+                    //             <span className="font-bold text-lg text-left">{result.displayName}</span>
+                    //             <p className="text-xs text-left">{result.email}</p>
+                    //         </div>
+                    //     </div>
+                    // ))}
+                //     {(isErr && isFocus) && errMsg}
+                // </div>
+                <FullWidthTabs setSearchFilter={setSearchFilter} searchResults={searchResults} isErr={isErr} errMsg={errMsg} handleResultClick={handleResultClick}/>
             }
-            {(searchResults.length != 0) && searchResults.map((result, index) => (
-                <div key={index} onClick={() => handleResultClick(index)} className="resultItem max-h-[56px] flex flex-row p-2 gap-x-2 border-b-solid border-b-black border-b-2 overflow-hidden cursor-pointer">
-                    <img className="rounded-[50%] object-cover" src={result.photoURL} alt="pp" width={'40px'} height={'40px'} />
-                    <div className="info flex flex-col items-start justify-center">
-                        <span className="font-bold text-lg text-left">{result.displayName}</span>
-                        <p className="text-xs text-left">{result.email}</p>
-                    </div>
-                </div>
-            ))}
-            {(isErr && isFocus) && errMsg}
+
         </div>
     );
 };
