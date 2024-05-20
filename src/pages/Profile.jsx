@@ -11,6 +11,7 @@ import CloseIcon from '@mui/icons-material/Close';
 import PersonRemoveIcon from '@mui/icons-material/PersonRemove';
 import LogoutIcon from '@mui/icons-material/Logout';
 import { useNavigate } from "react-router-dom";
+import BootstrapTooltip from "../materialUI/BootstrapTooltip";
 
 const Profile = () => {
 
@@ -173,8 +174,10 @@ const Profile = () => {
 
     return (
         <div className="profile min-w-[480px] relative bg-[#474B4F] flex flex-col justify-center items-center w-[50%] h-full m-auto border-solid border-2 rounded-lg border-[#86C232] gap-4">
-
-            <button onClick={() => { navigate("/") }} className="absolute top-2 left-2 z-10 bg-[#86C232] rounded-full cursor-pointer p-2 flex items-center justify-center"><ArrowBackIcon className="text-black"/></button>
+            
+            <BootstrapTooltip title="back">
+                <button onClick={() => { navigate("/") }} className="absolute top-2 left-2 z-10 bg-[#86C232] rounded-full cursor-pointer p-2 flex items-center justify-center"><ArrowBackIcon className="text-black"/></button>
+            </BootstrapTooltip>
 
             <div className="relative">
 
@@ -182,13 +185,17 @@ const Profile = () => {
 
                 <div className="bg-[#474B4F] absolute bottom-2 right-2 z-10 flex gap-2 rounded-full hover:border-2 hover:border-solid hover:border-[#86C232]" onMouseEnter={() => setShowButton(true)} onMouseLeave={() => setShowButton(false)}>
                     {showButton && (
-                        <button onClick={handleRemovePP} className="bg-[#6B6E70] rounded-full cursor-pointer p-2 flex items-center justify-center">
-                            <CloseIcon className='text-black'/>
-                        </button>
+                        <BootstrapTooltip title="remove picture">
+                            <button onClick={handleRemovePP} className="bg-[#6B6E70] rounded-full cursor-pointer p-2 flex items-center justify-center">
+                                <CloseIcon className='text-black'/>
+                            </button>
+                        </BootstrapTooltip>
                     )}
-                    <label for="ppUpload" className="bg-[#86C232] rounded-full cursor-pointer p-2 flex items-center justify-center">
-                        <EditIcon className="text-black"/>
-                    </label>
+                    <BootstrapTooltip title="edit">
+                        <label for="ppUpload" className="bg-[#86C232] rounded-full cursor-pointer p-2 flex items-center justify-center">
+                            <EditIcon className="text-black"/>
+                        </label>
+                    </BootstrapTooltip>
                 </div>
 
                 <input className="hidden" type="file" accept="image/*" id="ppUpload" onChange={handleEditPP} />

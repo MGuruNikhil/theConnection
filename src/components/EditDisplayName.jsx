@@ -5,6 +5,7 @@ import { doc, updateDoc } from "firebase/firestore";
 import { db } from "../firebase";
 import { AuthContext } from "../context/AuthContext";
 import { updateProfile } from "firebase/auth"
+import BootstrapTooltip from "../materialUI/BootstrapTooltip";
 
 
 const EditDisplayName = () => {
@@ -70,7 +71,7 @@ const EditDisplayName = () => {
                 /> 
             }
             <button onClick={handleClick}>
-                {!isEdit? <EditIcon className="text-black"/> : <CloseIcon className="text-black"/>}
+                {!isEdit? <BootstrapTooltip title="edit"><EditIcon className="text-black"/></BootstrapTooltip> : <BootstrapTooltip title="cancle"><CloseIcon className="text-black"/></BootstrapTooltip>}
             </button>
         </div>
     )

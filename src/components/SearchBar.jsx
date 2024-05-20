@@ -5,6 +5,7 @@ import { AuthContext } from '../context/AuthContext';
 import { ChatContext } from '../context/ChatContext';
 import FullWidthTabs from '../materialUI/FullWidthTabs';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
+import BootstrapTooltip from '../materialUI/BootstrapTooltip';
 
 const SearchBar = () => {
     const { currentUser } = useContext(AuthContext);
@@ -86,7 +87,9 @@ const SearchBar = () => {
         <div className="flex flex-col">
             <div className='flex w-full'>
                 {(isFocus) &&
-                    <button onClick={() => { setIsFocus(false); setIsErr(false); setSearchName(''); setSearchResults([]) }} className='bg-[#2B2A33] pl-2'><ArrowBackIcon /></button>
+                    <BootstrapTooltip title="back">
+                        <button onClick={() => { setIsFocus(false); setIsErr(false); setSearchName(''); setSearchResults([]) }} className='bg-[#2B2A33] pl-2'><ArrowBackIcon /></button>
+                    </BootstrapTooltip>
                 }
                 <input
                     type="text"
