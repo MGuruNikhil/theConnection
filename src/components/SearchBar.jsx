@@ -3,8 +3,8 @@ import { db } from '../firebase';
 import { collection, getDocs, query, where, updateDoc, arrayUnion, setDoc, doc } from 'firebase/firestore';
 import { AuthContext } from '../context/AuthContext';
 import { ChatContext } from '../context/ChatContext';
-import Back from "../assets/back.png"
 import FullWidthTabs from '../materialUI/FullWidthTabs';
+import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 
 const SearchBar = () => {
     const { currentUser } = useContext(AuthContext);
@@ -85,7 +85,7 @@ const SearchBar = () => {
         <div className="flex flex-col">
             <div className='flex w-full'>
                 {(isFocus) &&
-                    <button onClick={() => { setIsFocus(false); setIsErr(false); setSearchName(''); setSearchResults([]) }} className='bg-[#2B2A33] pl-2'><img src={Back} width={20} height={20} alt="back" /></button>
+                    <button onClick={() => { setIsFocus(false); setIsErr(false); setSearchName(''); setSearchResults([]) }} className='bg-[#2B2A33] pl-2'><ArrowBackIcon /></button>
                 }
                 <input
                     type="text"
@@ -93,7 +93,7 @@ const SearchBar = () => {
                     style={{ minWidth: '0' }}
                     placeholder={(isFocus ? ((searchFilter === "displayName") ? "Search by name" : "Search by email") : "Search...")}
                     onChange={(e) => setSearchName(e.target.value)}
-                    onFocus={() => { setIsFocus(true) }}
+                    onFocus={() => { setIsFocus(true); setIsErr(true); }}
                     onKeyDown={(e) => {
                         if (e.key === 'Enter') {
                             handleSubmit();
@@ -103,42 +103,6 @@ const SearchBar = () => {
                 />
             </div>
             {(isFocus) &&
-                // <div className='felx flex-col w-full'>
-                //     <div className='flex justify-between p-2'>
-                //         <div className='flex gap-2'>
-                //             <input
-                //                 type="radio"
-                //                 name="searchFilter"
-                //                 id="displayName"
-                //                 value="displayName"
-                //                 checked={searchFilter === 'displayName'}
-                //                 onChange={handleRadioChange}
-                //             />
-                //             <label htmlFor="displayName">Name</label>
-                //         </div>
-                //         <div className='flex gap-2'>
-                //             <input
-                //                 type="radio"
-                //                 name="searchFilter"
-                //                 id="email"
-                //                 value="email"
-                //                 checked={searchFilter === 'email'}
-                //                 onChange={handleRadioChange}
-                //             />
-                //             <label htmlFor="email">Email</label>
-                //         </div>
-                //     </div>
-                    // {(searchResults.length != 0) && searchResults.map((result, index) => (
-                    //     <div key={index} onClick={() => handleResultClick(index)} className="resultItem max-h-[56px] flex flex-row p-2 gap-x-2 border-b-solid border-b-black border-b-2 overflow-hidden cursor-pointer">
-                    //         <img className="rounded-[50%] object-cover" src={result.photoURL} alt="pp" width={'40px'} height={'40px'} />
-                    //         <div className="info flex flex-col items-start justify-center">
-                    //             <span className="font-bold text-lg text-left">{result.displayName}</span>
-                    //             <p className="text-xs text-left">{result.email}</p>
-                    //         </div>
-                    //     </div>
-                    // ))}
-                //     {(isErr && isFocus) && errMsg}
-                // </div>
                 <FullWidthTabs setSearchFilter={setSearchFilter} searchResults={searchResults} isErr={isErr} errMsg={errMsg} handleResultClick={handleResultClick}/>
             }
 

@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect, useContext } from "react";
-import Edit from "../assets/edit.png"
-import Close from "../assets/close.png"
+import EditIcon from '@mui/icons-material/Edit';
+import CloseIcon from '@mui/icons-material/Close';
 import { doc, updateDoc } from "firebase/firestore";
 import { db } from "../firebase";
 import { AuthContext } from "../context/AuthContext";
@@ -70,7 +70,7 @@ const EditDisplayName = () => {
                 /> 
             }
             <button onClick={handleClick}>
-                <img src={!isEdit? Edit : Close} width={30} height={30} alt="edit" />
+                {!isEdit? <EditIcon className="text-black"/> : <CloseIcon className="text-black"/>}
             </button>
         </div>
     )

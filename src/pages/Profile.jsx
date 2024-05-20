@@ -1,15 +1,15 @@
 import { useContext, useState } from "react";
 import { AuthContext } from "../context/AuthContext";
-import logOutIcon from '../assets/logout.png';
 import { auth, storage, db } from "../firebase";
 import { deleteUser, reauthenticateWithCredential, signOut, updateProfile, EmailAuthProvider } from "firebase/auth";
 import { ref, uploadBytesResumable, getDownloadURL, deleteObject } from "firebase/storage";
 import { doc, updateDoc, getDoc, arrayRemove, deleteDoc } from "firebase/firestore";
 import EditDisplayName from "../components/EditDisplayName";
-import Back from "../assets/arrow.png";
-import Edit from "../assets/edit.png";
-import Close from "../assets/close.png";
-import Delete from "../assets/delete-user.png";
+import ArrowBackIcon from '@mui/icons-material/ArrowBack';
+import EditIcon from '@mui/icons-material/Edit';
+import CloseIcon from '@mui/icons-material/Close';
+import PersonRemoveIcon from '@mui/icons-material/PersonRemove';
+import LogoutIcon from '@mui/icons-material/Logout';
 import { useNavigate } from "react-router-dom";
 
 const Profile = () => {
@@ -174,7 +174,7 @@ const Profile = () => {
     return (
         <div className="profile min-w-[480px] relative bg-[#474B4F] flex flex-col justify-center items-center w-[50%] h-full m-auto border-solid border-2 rounded-lg border-[#86C232] gap-4">
 
-            <button onClick={() => { navigate("/") }} className="absolute top-2 left-2 z-10 bg-[#86C232] rounded-full cursor-pointer p-2 flex items-center justify-center"><img src={Back} width={20} height={20} alt="back" /></button>
+            <button onClick={() => { navigate("/") }} className="absolute top-2 left-2 z-10 bg-[#86C232] rounded-full cursor-pointer p-2 flex items-center justify-center"><ArrowBackIcon className="text-black"/></button>
 
             <div className="relative">
 
@@ -183,11 +183,11 @@ const Profile = () => {
                 <div className="bg-[#474B4F] absolute bottom-2 right-2 z-10 flex gap-2 rounded-full hover:border-2 hover:border-solid hover:border-[#86C232]" onMouseEnter={() => setShowButton(true)} onMouseLeave={() => setShowButton(false)}>
                     {showButton && (
                         <button onClick={handleRemovePP} className="bg-[#6B6E70] rounded-full cursor-pointer p-2 flex items-center justify-center">
-                            <img src={Close} width={30} height={30} alt="remove profile picture" />
+                            <CloseIcon className='text-black'/>
                         </button>
                     )}
                     <label for="ppUpload" className="bg-[#86C232] rounded-full cursor-pointer p-2 flex items-center justify-center">
-                        <img src={Edit} width={30} height={30} alt="edit" />
+                        <EditIcon className="text-black"/>
                     </label>
                 </div>
 
@@ -206,11 +206,11 @@ const Profile = () => {
 
             <div className="flex flex-row gap-2">
                 <button onClick={handleDelAcc} className='gap-2 border border-transparent text-base font-semibold cursor-pointer transition-border-color duration-250 overflow-hidden text-black focus-visible:ring-4 focus-visible:ring-auto focus-visible:ring-[#842029] bg-[#DC3545] h-[40px] px-4 py-2 rounded-full focus:outline-none flex items-center justify-center'>
-                    <img src={Delete} width={30} height={30} alt="delete account" />
+                    <PersonRemoveIcon />
                     Delete Account
                 </button>
                 <button onClick={handleLogout} className='gap-2 border border-transparent text-base font-semibold cursor-pointer transition-border-color duration-250 overflow-hidden text-black focus-visible:ring-4 focus-visible:ring-auto focus-visible:ring-[#997404] bg-[#FFC107] h-[40px] px-4 py-2 rounded-full focus:outline-none flex items-center justify-center'>
-                    <img src={logOutIcon} width={30} height={30} alt="log out" />
+                    <LogoutIcon />
                     Log Out
                 </button>
             </div>

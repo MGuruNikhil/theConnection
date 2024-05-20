@@ -60,8 +60,7 @@ export default function FullWidthTabs(props) {
 				<Tabs
 					value={value}
 					onChange={handleChange}
-					indicatorColor="primary"
-					textColor="inherit"
+					textColor='inherit'
 					variant="fullWidth"
 					aria-label="full width tabs example"
 					sx={{ bgcolor: '#474b4f' }}

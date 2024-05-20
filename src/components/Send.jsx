@@ -4,6 +4,7 @@ import { ChatContext } from '../context/ChatContext';
 import { Timestamp, arrayUnion, doc, updateDoc } from "firebase/firestore";
 import { db } from '../firebase';
 import { v4 as uuidv4 } from 'uuid';
+import SendIcon from '@mui/icons-material/Send';
 
 const Send = () => {
     const { currentUser } = useContext(AuthContext);
@@ -39,7 +40,7 @@ const Send = () => {
                     }
                 }}
             />
-            <button onClick={handleSend} className="send rounded-r-md border border-transparent py-2 px-4 text-base font-semibold font-inherit bg-[#1a1a1a] cursor-pointer transition-border-color duration-250 overflow-hidden text-[#86C232] focus:outline-none focus-visible:ring-4 focus-visible:ring-auto focus-visible:ring-[#86C232] hover:border-[#86C232]">Send</button>
+            <button onClick={handleSend} className="send rounded-r-md border border-transparent py-2 px-4 text-base font-semibold font-inherit bg-[#1a1a1a] cursor-pointer transition-border-color duration-250 overflow-hidden text-[#86C232] focus:outline-none focus-visible:ring-4 focus-visible:ring-auto focus-visible:ring-[#86C232] hover:border-[#86C232]"><SendIcon /></button>
         </div>
     );
 }

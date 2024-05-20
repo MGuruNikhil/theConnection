@@ -4,7 +4,7 @@ import { createUserWithEmailAndPassword, updateProfile, sendEmailVerification } 
 import { ref, uploadBytesResumable, getDownloadURL } from "firebase/storage";
 import { doc, setDoc } from "firebase/firestore";
 import { Link, useNavigate } from 'react-router-dom';
-import addPP from '../assets/addPP.png'
+import AddPhotoAlternateIcon from '@mui/icons-material/AddPhotoAlternate';
 
 const Signup = () => {
 
@@ -134,7 +134,7 @@ const Signup = () => {
                 <input className='p-2 border-b-2 border-b-[#86C232] focus:outline-none' type="email" name="email" id="email" placeholder='Enter email' />
                 <input className='p-2 border-b-2 border-b-[#86C232] focus:outline-none' type="password" name="password" id="password" placeholder='Set password' />
                 <label htmlFor="profilePhoto" className='flex gap-2 cursor-pointer'>
-                    <img src={addPP} alt="pp" />
+                    <AddPhotoAlternateIcon className='text-[#86c232]'/>
                     <span>Add a profile pic</span>
                 </label>
                 <input className="hidden" type="file" accept="image/*" name="profilePhoto" id="profilePhoto" />
