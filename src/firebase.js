@@ -3,9 +3,8 @@ import { getAuth } from "firebase/auth";
 import { getStorage } from "firebase/storage";
 import { getFirestore } from "firebase/firestore";
 
-
 const firebaseConfig = {
-  apiKey: "AIzaSyDKT5CYKYiK-S4_0Iz3nS89X-HO9SAxIMM",
+  apiKey: import.meta.env.VITE_FB,
   authDomain: "hotchat-nik.firebaseapp.com",
   projectId: "hotchat-nik",
   storageBucket: "hotchat-nik.appspot.com",
