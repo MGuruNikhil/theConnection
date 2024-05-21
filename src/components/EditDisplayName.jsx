@@ -55,23 +55,26 @@ const EditDisplayName = () => {
     }, [isEdit]);
 
     return (
-        <div className="flex items-center justify-between w-[70%] p-2 h-[50px] gap-2">
-            <p className="flex-shrink-0 inline-block whitespace-no-wrap text-[#ffffff] text-semibold">Display Name :</p>
-            {!isEdit? <span className="text-[#86C232] text-bold">{currentUser["displayName"]}</span> : 
-                <input 
-                    ref={inputRef} 
-                    style={{ minWidth: '0' }} 
-                    onChange={(e)=>{setEditedText(e.target.value)}} 
-                    value={editedText} 
-                    className="flex-grow rounded-md p-[2px] focus:outline-none focus:ring-2 focus:ring-[#86C232] h-[100%]" 
-                    type="text" 
-                    name="displayName"
-                    id="displayName"
-                    onKeyDown={handleSubmit}
-                /> 
-            }
+        <div className="p-4 flex justify-between w-[70%] items-center rounded-xl bg-gradient-to-r from-[#004545] to-[#1f7474]">
+
+            <div className="flex flex-col items-start">
+                <p className="flex-shrink-0 inline-block whitespace-no-wrap text-[#ffffff] font-black">Display Name</p>
+                {!isEdit? <span className="text-[#86C232] font-semibold">{currentUser["displayName"]}</span> : 
+                    <input 
+                        ref={inputRef} 
+                        style={{ minWidth: '0' }} 
+                        onChange={(e)=>{setEditedText(e.target.value)}} 
+                        value={editedText} 
+                        className="flex-grow rounded-md p-[2px] focus:outline-none focus:ring-2 focus:ring-[#86C232] h-[100%]" 
+                        type="text" 
+                        name="displayName"
+                        id="displayName"
+                        onKeyDown={handleSubmit}
+                    /> 
+                }
+            </div>
             <button onClick={handleClick}>
-                {!isEdit? <BootstrapTooltip title="edit"><EditIcon className="text-black"/></BootstrapTooltip> : <BootstrapTooltip title="cancle"><CloseIcon className="text-black"/></BootstrapTooltip>}
+                {!isEdit? <BootstrapTooltip title="edit"><EditIcon /></BootstrapTooltip> : <BootstrapTooltip title="cancle"><CloseIcon /></BootstrapTooltip>}
             </button>
         </div>
     )

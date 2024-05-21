@@ -11,8 +11,11 @@ const Send = () => {
     const { otherUser } = useContext(ChatContext);
     const ChatID = (currentUser.uid < otherUser?.uid) ? (currentUser.uid + "-" + otherUser?.uid) : (otherUser?.uid + "-" + currentUser.uid);
     const messageRef = doc(db, "chats", ChatID);
-    const [message, setMessage] = useState('');
+    const [msg, setMsg] = useState('');
+
     const handleSend = async () => {
+        const message = msg;
+        setMsg('');
         if (message != '') {
             await updateDoc(messageRef, {
                 messages: arrayUnion({
@@ -22,7 +25,6 @@ const Send = () => {
                     timeStamp: Timestamp.now(),
                 }),
             });
-            setMessage('');
         }
     }
     return (
@@ -32,8 +34,8 @@ const Send = () => {
                 className="flex-1 px-4 py-2 focus:outline-none"
                 style={{ minWidth: '0' }}
                 placeholder='Type here...'
-                value={message}
-                onChange={(e) => setMessage(e.target.value)}
+                value={msg}
+                onChange={(e) => setMsg(e.target.value)}
                 onKeyDown={(e) => {
                     if (e.key === 'Enter') {
                         handleSend();

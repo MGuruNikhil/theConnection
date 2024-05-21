@@ -24,7 +24,7 @@ input:-webkit-autofill{
 
 :root {
     color: #ffffff;
-    background-color: #6B6E70;
+    /* background-color: #6B6E70; */
     font-synthesis: none;
     line-height: 1.5rem;
     text-rendering: optimizeLegibility;

@@ -7,6 +7,7 @@ import { doc, updateDoc, getDoc, arrayRemove, deleteDoc } from "firebase/firesto
 import EditDisplayName from "../components/EditDisplayName";
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import EditIcon from '@mui/icons-material/Edit';
+import EditOffIcon from '@mui/icons-material/EditOff';
 import CloseIcon from '@mui/icons-material/Close';
 import PersonRemoveIcon from '@mui/icons-material/PersonRemove';
 import LogoutIcon from '@mui/icons-material/Logout';
@@ -173,17 +174,17 @@ const Profile = () => {
     }
 
     return (
-        <div className="profile min-w-[480px] relative bg-[#474B4F] flex flex-col justify-center items-center w-[50%] h-full m-auto border-solid border-2 rounded-lg border-[#86C232] gap-4">
+        <div className="profile min-w-[480px] relative bg-gradient-to-br from-gray-700 to-gray-950 flex flex-col justify-center items-center w-[50%] h-full m-auto rounded-xl gap-4">
             
             <BootstrapTooltip title="back">
-                <button onClick={() => { navigate("/") }} className="absolute top-2 left-2 z-10 bg-[#86C232] rounded-full cursor-pointer p-2 flex items-center justify-center"><ArrowBackIcon className="text-black"/></button>
+                <button onClick={() => { navigate("/") }} className="absolute top-2 left-2 z-10 bg-[#88b430] rounded-full cursor-pointer p-2 flex items-center justify-center"><ArrowBackIcon className="text-black"/></button>
             </BootstrapTooltip>
 
             <div className="relative">
 
-                <img src={currentUser.photoURL} className='rounded-full w-[200px] h-[200px] object-cover border-2 border-solid border-[#86C232]' alt="pp" />
+                <img src={currentUser.photoURL} className='rounded-full w-[200px] h-[200px] object-cover border-2 border-solid border-[#1f7474]' alt="pp" />
 
-                <div className="bg-[#474B4F] absolute bottom-2 right-2 z-10 flex gap-2 rounded-full hover:border-2 hover:border-solid hover:border-[#86C232]" onMouseEnter={() => setShowButton(true)} onMouseLeave={() => setShowButton(false)}>
+                <div className="bg-gradient-to-br from-gray-700 to-gray-950 absolute bottom-2 right-2 z-10 flex gap-2 rounded-full hover:border-2 hover:border-solid hover:border-[#1f7474]" onMouseEnter={() => setShowButton(true)} onMouseLeave={() => setShowButton(false)}>
                     {showButton && (
                         <BootstrapTooltip title="remove picture">
                             <button onClick={handleRemovePP} className="bg-[#6B6E70] rounded-full cursor-pointer p-2 flex items-center justify-center">
@@ -192,7 +193,7 @@ const Profile = () => {
                         </BootstrapTooltip>
                     )}
                     <BootstrapTooltip title="edit">
-                        <label for="ppUpload" className="bg-[#86C232] rounded-full cursor-pointer p-2 flex items-center justify-center">
+                        <label for="ppUpload" className="bg-[#88b430] rounded-full cursor-pointer p-2 flex items-center justify-center">
                             <EditIcon className="text-black"/>
                         </label>
                     </BootstrapTooltip>
@@ -203,13 +204,16 @@ const Profile = () => {
             </div>
 
             <EditDisplayName label="Display Name" fbkey="displayName" />
-
-            <div className="flex items-center w-[70%] p-2 h-[50px]">
-                <p className="flex-shrink-0 inline-block whitespace-no-wrap text-[#ffffff] text-semibold">Email :</p>
-                <span className="grow text-[#86C232] text-bold">{currentUser.email}</span>
+            
+            <div className="p-4 flex justify-between w-[70%] items-center rounded-xl bg-gradient-to-r from-[#004545] to-[#1f7474]">
+                <div className="flex flex-col items-start">
+                    <p className="flex-shrink-0 inline-block whitespace-no-wrap text-[#ffffff] font-black">Email</p>
+                    <span className="text-[#86C232] font-semibold">{currentUser.email}</span>
+                </div>
+                <BootstrapTooltip title="edit disabled">
+                    <EditOffIcon />
+                </BootstrapTooltip>
             </div>
-
-            {/* <EditableComp label="Email id" fbkey="email" /> */}
 
             <div className="flex flex-row gap-2">
                 <button onClick={handleDelAcc} className='gap-2 border border-transparent text-base font-semibold cursor-pointer transition-border-color duration-250 overflow-hidden text-black focus-visible:ring-4 focus-visible:ring-auto focus-visible:ring-[#842029] bg-[#DC3545] h-[40px] px-4 py-2 rounded-full focus:outline-none flex items-center justify-center'>

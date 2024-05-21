@@ -37,9 +37,9 @@ const ChatList = () => {
     }
 
     return (
-        <div className="ChatList flex-1 bg-[#474B4F] h-full overflow-y-scroll scrollbar-hidden">
+        <div className="ChatList flex-1 bg-gradient-to-br from-gray-700 to-gray-950 h-full overflow-y-scroll scrollbar-hidden">
             {(chatList.length !=0) ? chatList.map((listItem, index) => (
-                <div key={index} onClick={() => handleClick(index)} className={`${listItem.uid === otherUser?.uid ? 'bg-[#222629]' : ''} h-[56px] flex flex-row p-2 justify-between border-b-solid border-b-black border-b-[1px] overflow-hidden cursor-pointer`}>
+                <div key={index} onClick={() => handleClick(index)} className={`${listItem.uid === otherUser?.uid ? 'bg-gradient-to-r from-[#dd5a5a] to-[#9d1919]' : 'bg-gradient-to-r from-[#004545] to-[#1f7474]'} h-[56px] flex flex-row p-2 justify-between overflow-hidden cursor-pointer border-b-[1px] border-b-[#000000]`}>
                     <img className='rounded-[50%] object-cover' src={listItem.photoURL} alt="pp" width={'40px'} height={'40px'} />
                     <p className='self-center flex-1'>{listItem.displayName}</p>
                 </div>

@@ -27,17 +27,17 @@ const SideHeader = () => {
     };
 
     return (
-        <div className="SideHeader max-h-[56px] flex flex-row p-2 justify-between bg-[#61892F] overflow-hidden">
+        <div className="SideHeader max-h-[56px] flex flex-row p-2 justify-between bg-gradient-to-r from-[#1f7474] to-[#88b430] overflow-hidden">
             <img src={photoURL} alt="pp" width={'40px'} height={'40px'} className='rounded-[50%] object-cover hover:border-[1px] hover:border-solid hover:border-[#86C232] cursor-pointer' />
             <p className='self-center'>{displayName}</p>
-            <div className='flex flex-row gap-2'>
+            <div className='flex flex-row gap-4'>
                 <BootstrapTooltip title="Profile">
-                    <button onClick={()=>{navigate("/profile")}} className='border border-transparent text-base font-semibold font-inherit cursor-pointer transition-border-color duration-250 overflow-hidden text-[#86C232] focus-visible:ring-4 focus-visible:ring-auto focus-visible:ring-[#86C232] hover:border-[#86C232] h-[40px] w-[40px] px-1 py-2 bg-inherit rounded-full focus:outline-none flex items-center justify-center'>
+                    <button onClick={()=>{navigate("/profile")}}>
                         <PersonIcon className='text-[#000000]'/>
                     </button>
                 </BootstrapTooltip>
                 <BootstrapTooltip title="log Out">
-                    <button onClick={handleLogout} className='border border-transparent text-base font-semibold font-inherit cursor-pointer transition-border-color duration-250 overflow-hidden text-[#86C232] focus-visible:ring-4 focus-visible:ring-auto focus-visible:ring-[#86C232] hover:border-[#86C232] h-[40px] w-[40px] px-1 py-2 bg-inherit rounded-full focus:outline-none flex items-center justify-center'>
+                    <button onClick={handleLogout}>
                         <LogoutIcon className='text-[#000000]'/>
                     </button>
                 </BootstrapTooltip>

@@ -16,18 +16,18 @@ const Chat = () => {
     return (
         <>
             {matches && (
-                <div className="container min-w-[768px] w-[80%] h-full m-auto self-center rounded-lg overflow-hidden border-2 border-[#86C232] border-solid flex flex-row">
+                <div className="container min-w-[768px] w-[80%] h-full m-auto rounded-xl self-center overflow-hidden flex flex-row">
                     <Sidebar />
                     <ChatArea />
                 </div>
             )}
             {(!matches && otherUser==null) && (
-                <div className="container w-[80%] h-full m-auto self-center rounded-lg overflow-hidden border-2 border-[#86C232] border-solid">
+                <div className="container w-[80%] h-full m-auto rounded-xl self-center overflow-hidden">
                     <Sidebar />
                 </div>                
             )}
             {(!matches && otherUser!=null) && (
-                <div className="container w-[80%] h-full m-auto self-center rounded-lg overflow-hidden border-2 border-[#86C232] border-solid">
+                <div className="container w-[80%] h-full m-auto rounded-xl self-center overflow-hidden">
                     <ChatArea />
                 </div>
             )}

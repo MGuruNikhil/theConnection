@@ -84,7 +84,7 @@ const SearchBar = () => {
     };
 
     return (
-        <div className="flex flex-col">
+        <div className="flex flex-col bg-gradient-to-br from-gray-700 to-gray-950">
             <div className='flex w-full'>
                 {(isFocus) &&
                     <BootstrapTooltip title="back">

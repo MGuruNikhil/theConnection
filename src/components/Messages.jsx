@@ -31,10 +31,12 @@ const Messages = () => {
     }, [chats]);
 
     return (
-        <div ref={divRef} className="Messages flex-1 bg-gray-950 flex flex-col gap-2 overflow-scroll p-2 scrollbar-hidden">
-            {chats && chats.map((chat, index) => (  
-                <div key={index} className={`break-words bg-[#86C232] max-w-[90%] ${chat.from === currentUser.uid ? 'place-self-end rounded-tr-none' : 'place-self-start rounded-tl-none'} px-4 py-2 rounded-xl text-start`}>{chat.message}</div>
-            ))}
+        <div className='bg-gradient-to-br from-gray-700 to-gray-950 flex-1 overflow-hidden'>
+            <div ref={divRef} className="w-full h-full bg-[url('https://www.transparenttextures.com/patterns/asfalt-light.png')] flex flex-col gap-2 overflow-scroll p-2 scrollbar-hidden">
+                {chats && chats.map((chat, index) => (  
+                    <div key={index} className={`break-words max-w-[90%] ${chat.from === currentUser.uid ? 'place-self-end rounded-tr-none bg-gradient-to-bl from-[#207175] to-[#88b430]' : 'place-self-start rounded-tl-none bg-gradient-to-br from-[#207175] to-[#c13434]'} px-4 py-2 rounded-xl text-start`}>{chat.message}</div>
+                ))}
+            </div>
         </div>
     );
 }

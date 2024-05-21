@@ -126,7 +126,7 @@ const Signup = () => {
     }
 
     return (
-        <div className="signup p-16 bg-[#474B4F] flex flex-col justify-center space-y-5 max-w-fit m-auto border-solid border-2 rounded-lg border-[#86C232]">
+        <div className="signup p-16 bg-gradient-to-br from-gray-700 to-gray-950 flex flex-col justify-center space-y-5 max-w-fit m-auto rounded-xl">
             <h1 className="text-[3.2em] leading-110 text-[#86C232]">hotCHAT</h1>
             <h2 className='text-[1.6em] text-[#61892F]'>Sign Up</h2>
             <form onSubmit={handleSubmit} className="flex flex-col space-y-5">
@@ -138,7 +138,7 @@ const Signup = () => {
                     <span>Add a profile pic</span>
                 </label>
                 <input className="hidden" type="file" accept="image/*" name="profilePhoto" id="profilePhoto" />
-                <button className='min-w-[232px] rounded-md border border-transparent py-2 px-4 text-base font-semibold font-inherit bg-[#1a1a1a] cursor-pointer transition-border-color duration-250 overflow-hidden text-[#86C232] focus:outline-none focus-visible:ring-4 focus-visible:ring-auto focus-visible:ring-[#86C232] hover:border-[#86C232]'>Sign Up</button>
+                <button className='min-w-[232px] rounded-md border border-transparent py-2 px-4 text-base font-semibold font-inherit bg-[#1a1a1a] cursor-pointer transition-border-color duration-250 overflow-hidden text-[#86C232] focus:outline-none focus-visible:ring-4 focus-visible:ring-auto focus-visible:ring-[#86C232] hover:border-[#6a9317]'>Sign Up</button>
                 {isErr && <span>{error}</span>}
             </form>
             <div className='flex items-center justify-center gap-2'>

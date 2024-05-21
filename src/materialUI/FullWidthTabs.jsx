@@ -63,8 +63,8 @@ export default function FullWidthTabs(props) {
 					textColor='inherit'
 					variant="fullWidth"
 					aria-label="full width tabs example"
-					sx={{ bgcolor: '#474b4f' }}
-					TabIndicatorProps={{style: {background:'#61892f'}}}
+					sx={{ bgcolor: '#1f7474' }}
+					TabIndicatorProps={{style: {background:'#c13434'}}}
 				>
 					<Tab label="Display Name" {...a11yProps(0)} />
 					<Tab label="Email" {...a11yProps(1)} />
