@@ -5,6 +5,7 @@ import { AuthContext } from '../context/AuthContext';
 import { ChatContext } from '../context/ChatContext';
 import FullWidthTabs from '../materialUI/FullWidthTabs';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
+import SearchIcon from '@mui/icons-material/Search';
 import BootstrapTooltip from '../materialUI/BootstrapTooltip';
 
 const SearchBar = () => {
@@ -86,9 +87,15 @@ const SearchBar = () => {
     return (
         <div className="flex flex-col bg-gradient-to-br from-gray-700 to-gray-950">
             <div className='flex w-full'>
-                {(isFocus) &&
+                {(!isFocus) ?
+                    <BootstrapTooltip title="search">
+                        <button onClick={() => { setIsErr(true); setErrMsg("Search for some user"); setIsFocus(true); }} className='bg-[#2b2a33] p-2'>
+                            <SearchIcon />
+                        </button>
+                    </BootstrapTooltip>
+                    :
                     <BootstrapTooltip title="back">
-                        <button onClick={() => { setIsFocus(false); setIsErr(false); setSearchName(''); setSearchResults([]) }} className='bg-[#2B2A33] pl-2'><ArrowBackIcon /></button>
+                        <button onClick={() => { setIsFocus(false); setIsErr(false); setSearchName(''); setSearchResults([]) }} className='bg-[#2b2a33] p-2'><ArrowBackIcon /></button>
                     </BootstrapTooltip>
                 }
                 <input
@@ -97,7 +104,7 @@ const SearchBar = () => {
                     style={{ minWidth: '0' }}
                     placeholder={(isFocus ? ((searchFilter === "displayName") ? "Search by name" : "Search by email") : "Search...")}
                     onChange={(e) => setSearchName(e.target.value)}
-                    onFocus={() => { if(!isFocus) { setIsErr(true); setErrMsg("Search for some user"); setIsFocus(true);} }}
+                    onFocus={() => { if (!isFocus) { setIsErr(true); setErrMsg("Search for some user"); setIsFocus(true); } }}
                     onKeyDown={(e) => {
                         if (e.key === 'Enter') {
                             handleSubmit();
@@ -107,7 +114,7 @@ const SearchBar = () => {
                 />
             </div>
             {(isFocus) &&
-                <FullWidthTabs setSearchFilter={setSearchFilter} searchResults={searchResults} isErr={isErr} errMsg={errMsg} handleResultClick={handleResultClick}/>
+                <FullWidthTabs setSearchFilter={setSearchFilter} searchResults={searchResults} isErr={isErr} errMsg={errMsg} handleResultClick={handleResultClick} />
             }
 
         </div>
