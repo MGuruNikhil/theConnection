@@ -60,7 +60,7 @@ const Login = () => {
     };
 
     return (
-        <div className="login p-16 bg-gradient-to-br from-gray-700 to-gray-950 flex flex-col justify-center space-y-5 max-w-fit rounded-xl">
+        <div className="container p-16 bg-gradient-to-br from-gray-700 to-gray-950 flex flex-col justify-center space-y-5 max-w-fit rounded-xl">
             <h1 className="text-[3.2em] leading-110 text-[#86C232]">hotCHAT</h1>
             <h2 className='text-[1.6em] text-[#61892F]'>Log in</h2>
             <form onSubmit={handleSubmit} className="flex flex-col space-y-5">

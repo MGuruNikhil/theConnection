@@ -41,6 +41,9 @@ input[type="text"], input[type="email"], input[type="password"], input[type="num
 a:hover {
     color: #747bff;
 }
+.container {
+    box-shadow: rgba(0, 0, 0, 0.35) 0px 5px 15px;
+}
 
 @media screen and (max-width: 480px) {
     #root {

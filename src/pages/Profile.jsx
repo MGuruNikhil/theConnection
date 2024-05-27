@@ -174,7 +174,7 @@ const Profile = () => {
     }
 
     return (
-        <div className="profile min-w-[480px] relative bg-gradient-to-br from-gray-700 to-gray-950 flex flex-col justify-center items-center w-[50%] h-full m-auto rounded-xl gap-4">
+        <div className="container min-w-[480px] relative bg-gradient-to-br from-gray-700 to-gray-950 flex flex-col justify-center items-center w-[50%] h-full m-auto rounded-xl gap-4">
             
             <BootstrapTooltip title="back">
                 <button onClick={() => { navigate("/") }} className="absolute top-2 left-2 z-10 bg-[#88b430] rounded-full cursor-pointer p-2 flex items-center justify-center"><ArrowBackIcon className="text-black"/></button>
