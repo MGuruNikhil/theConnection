@@ -7,6 +7,7 @@ import { AuthContext } from './context/AuthContext'
 import { signOut } from 'firebase/auth'
 import { auth } from './firebase'
 import Profile from './pages/Profile'
+import PageNotFound from './pages/pageNotFound'
 
 function App() {
 
@@ -41,8 +42,9 @@ function App() {
             <Profile />
           </AuthProtection>
         }/>
-        <Route path='signup' element={<Signup />} />
-        <Route path='login' element={<Login />} />
+        <Route path='/signup' element={<Signup />} />
+        <Route path='/login' element={<Login />} />
+        <Route path='/*' element={<PageNotFound />} />
       </Routes>
     </BrowserRouter>
   )
