@@ -14,16 +14,18 @@ function App() {
   const {currentUser} = useContext(AuthContext);
 
   const AuthProtection = ({children}) => {
-    if(currentUser && !currentUser.emailVerified) {
-      signOut(auth)
-      .then(() => {
-          console.log('User logged out successfully');
-      })
-      .catch((error) => {
-          console.error('Error during logout:', error);
-      });
+    if(currentUser != null && currentUser != {} && currentUser != undefined) {
+      if(!(currentUser.emailVerified)) {
+        signOut(auth)
+        .then(() => {
+            console.log('User logged out successfully');
+        })
+        .catch((error) => {
+            console.error('Error during logout:', error);
+        });
+      }
     }
-    if(!currentUser) {
+    else {
       return <Navigate to={"/login"} />
     }
     return children;

@@ -6,7 +6,7 @@ import { ChatContext } from '../context/ChatContext';
 const Chat = () => {
 
     const { otherUser } = useContext(ChatContext);
-    const [matches, setMatches] = useState(window.matchMedia("(min-width: 768px)").matches)
+    const [matches, setMatches] = useState(window.matchMedia("(min-width: 768px)").matches);
 
     useEffect(() => {
         const handler = e => setMatches(e.matches);
