@@ -17,12 +17,14 @@ const SearchBar = () => {
     const [errMsg, setErrMsg] = useState('Search for some user');
     const [isFocus, setIsFocus] = useState(false);
     const [searchFilter, setSearchFilter] = useState('displayName');
+    const [isLoading, setIsLoading] = useState(false);
 
     useEffect(() => {
         handleSubmit();
     }, [searchFilter])
 
     const handleSubmit = async () => {
+        setIsLoading(true);
         if (searchName.length > 0) {
             setSearchResults([]);
             setIsErr(false);
@@ -63,6 +65,7 @@ const SearchBar = () => {
             setIsErr(true);
             setErrMsg("Search for some user");
         }
+        setIsLoading(false);
     };
 
     const handleResultClick = async (index) => {
@@ -114,7 +117,7 @@ const SearchBar = () => {
                 />
             </div>
             {(isFocus) &&
-                <FullWidthTabs setSearchFilter={setSearchFilter} searchResults={searchResults} isErr={isErr} errMsg={errMsg} handleResultClick={handleResultClick} />
+                <FullWidthTabs setSearchFilter={setSearchFilter} searchResults={searchResults} isErr={isErr} errMsg={errMsg} isLoading={isLoading} handleResultClick={handleResultClick} />
             }
 
         </div>
