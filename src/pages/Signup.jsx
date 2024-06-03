@@ -5,11 +5,13 @@ import { ref, uploadBytesResumable, getDownloadURL } from "firebase/storage";
 import { doc, setDoc } from "firebase/firestore";
 import { Link, useNavigate } from 'react-router-dom';
 import AddPhotoAlternateIcon from '@mui/icons-material/AddPhotoAlternate';
+import GradientCircularProgress from '../materialUI/GradientCircularProgress.jsx';
 
 const Signup = () => {
 
     const [isErr, setIsErr] = useState(false);
     const [error, setError] = useState("");
+    const [isLoading, setIsLoading] = useState(false);
     const navigate = useNavigate();
 
     function getAllSubstrings(str) {
@@ -24,6 +26,7 @@ const Signup = () => {
     }
 
     const handleSubmit = async (e) => {
+        setIsLoading(true);
         e.preventDefault();
         const displayName = e.target[0].value;
         const email = e.target[1].value;
@@ -115,6 +118,7 @@ const Signup = () => {
                             setError(errorMessage);
                         });
                 }
+                setIsLoading(false);
             })
             .catch((error) => {
                 setIsErr(true);
@@ -122,6 +126,7 @@ const Signup = () => {
                 const errorMessage = error.message;
                 console.log(errorMessage);
                 setError(errorMessage);
+                setIsLoading(false);
             });
     }
 
@@ -138,7 +143,9 @@ const Signup = () => {
                     <span>Add a profile pic</span>
                 </label>
                 <input className="hidden" type="file" accept="image/*" name="profilePhoto" id="profilePhoto" />
-                <button className='min-w-[232px] rounded-md border border-transparent py-2 px-4 text-base font-semibold font-inherit bg-[#1a1a1a] cursor-pointer transition-border-color duration-250 overflow-hidden text-[#86C232] focus:outline-none focus-visible:ring-4 focus-visible:ring-auto focus-visible:ring-[#86C232] hover:border-[#6a9317]'>Sign Up</button>
+                <button className='min-w-[232px] rounded-md border border-transparent py-2 px-4 text-base font-semibold font-inherit bg-[#1a1a1a] cursor-pointer transition-border-color duration-250 overflow-hidden text-[#86C232] focus:outline-none focus-visible:ring-4 focus-visible:ring-auto focus-visible:ring-[#86C232] hover:border-[#6a9317]'>
+                    {isLoading ? <GradientCircularProgress /> : <>Sign Up</>}
+                </button>
                 {isErr && <span>{error}</span>}
             </form>
             <div className='flex items-center justify-center gap-2'>

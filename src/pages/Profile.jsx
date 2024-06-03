@@ -146,12 +146,14 @@ const Profile = () => {
                 let chatList;
                 if (docSnap.exists()) {
                     chatList = docSnap.data().chatList;
-                    for (let i = 0; i < chatList.length; i++) {
-                        const chatID = (currentUser.uid < chatList[i]) ? (currentUser.uid + "-" + chatList[i]) : (chatList[i] + "-" + currentUser.uid);
-                        await updateDoc(doc(db, "users", chatList[i]), {
-                            chatList: arrayRemove(currentUser.uid)
-                        });
-                        await deleteDoc(doc(db, "chat", chatID));
+                    if(chatList) {
+                        for (let i = 0; i < chatList.length; i++) {
+                            const chatID = (currentUser.uid < chatList[i]) ? (currentUser.uid + "-" + chatList[i]) : (chatList[i] + "-" + currentUser.uid);
+                            await updateDoc(doc(db, "users", chatList[i]), {
+                                chatList: arrayRemove(currentUser.uid)
+                            });
+                            await deleteDoc(doc(db, "chat", chatID));
+                        }
                     }
                     await deleteDoc(doc(db, "users", currentUser.uid));
                 } else {
