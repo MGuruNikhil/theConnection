@@ -4,12 +4,12 @@ import CloseIcon from '@mui/icons-material/Close';
 
 const FullImg = () => {
 
-    const { imgUrl, isActive } = useContext(ImgContext);
+    const { imgUrl, isActive, setIsActive } = useContext(ImgContext);
 
     return (
         <div className={`${isActive ? 'flex' : 'hidden'} w-full h-full items-center justify-center bg-inherit backdrop-blur-sm z-50 fixed top-0 right-0 left-0 bottom-0`}>
-            <button className='fixed top-2 right-2'><CloseIcon /></button>
-            <img src={imgUrl} alt="profile pic" />          
+            <button onClick={() => {setIsActive(false);}} className='fixed top-2 right-2'><CloseIcon /></button>
+            <img className='max-w-[90%] max-h-[90%]' src={imgUrl} alt="profile pic" />          
         </div>
     )
 }

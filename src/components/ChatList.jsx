@@ -4,6 +4,7 @@ import { doc, getDoc, onSnapshot } from 'firebase/firestore';
 import { db } from '../firebase';
 import { ChatContext } from '../context/ChatContext';
 import GradientCircularProgress from '../materialUI/GradientCircularProgress';
+import Avatar from './Avatar';
 
 const ChatList = () => {
     const { currentUser } = useContext(AuthContext);
@@ -47,7 +48,7 @@ const ChatList = () => {
                 <>
                     {(chatList.length != 0) ? chatList.map((listItem, index) => (
                         <div key={index} onClick={() => handleClick(index)} className={`${listItem.uid === otherUser?.uid ? 'bg-gradient-to-r from-[#dd5a5a] to-[#9d1919]' : 'bg-gradient-to-r from-[#004545] to-[#1f7474]'} h-[56px] flex flex-row p-2 justify-between overflow-hidden cursor-pointer border-b-[1px] border-b-[#000000]`}>
-                            <img className='rounded-[50%] object-cover' src={listItem.photoURL} alt="pp" width={'40px'} height={'40px'} />
+                            <Avatar src={listItem.photoURL} alt="pp" width={'40px'} height={'40px'} />
                             <p className='self-center flex-1'>{listItem.displayName}</p>
                         </div>
                     )) : <div className='h-full w-full flex flex-col items-center justify-center p-2'>

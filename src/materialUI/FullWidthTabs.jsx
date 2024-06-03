@@ -8,6 +8,7 @@ import Tab from '@mui/material/Tab';
 import Typography from '@mui/material/Typography';
 import Box from '@mui/material/Box';
 import GradientCircularProgress from './GradientCircularProgress';
+import Avatar from '../components/Avatar';
 
 
 function TabPanel(props) {
@@ -87,7 +88,7 @@ export default function FullWidthTabs(props) {
 						<>
 							{(props.searchResults.length != 0) && props.searchResults.map((result, i) => (
 							<div key={i} onClick={() => props.handleResultClick(i)} className="resultItem max-h-[56px] flex flex-row p-2 gap-x-2 border-b-solid border-b-black border-b-2 overflow-hidden cursor-pointer">
-								<img className="rounded-[50%] object-cover" src={result.photoURL} alt="pp" width={'40px'} height={'40px'} />
+								<Avatar src={result.photoURL} alt="pp" width={'40px'} height={'40px'} />
 								<div className="info flex flex-col items-start justify-center">
 									<span className="font-bold text-lg text-left">{result.displayName}</span>
 									<p className="text-xs text-left">{result.email}</p>
@@ -106,7 +107,7 @@ export default function FullWidthTabs(props) {
 				>
 					{(props.searchResults.length != 0) && props.searchResults.map((result, i) => (
 						<div key={i} onClick={() => props.handleResultClick(i)} className="resultItem max-h-[56px] flex flex-row p-2 gap-x-2 border-b-solid border-b-black border-b-2 overflow-hidden cursor-pointer">
-							<img className="rounded-[50%] object-cover" src={result.photoURL} alt="pp" width={'40px'} height={'40px'} />
+							<Avatar src={result.photoURL} alt="pp" width={'40px'} height={'40px'} />
 							<div className="info flex flex-col items-start justify-center">
 								<span className="font-bold text-lg text-left">{result.displayName}</span>
 								<p className="text-xs text-left">{result.email}</p>
