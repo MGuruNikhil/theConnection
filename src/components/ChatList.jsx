@@ -18,7 +18,7 @@ const ChatList = () => {
                 const resp = [];
                 const chatListIds = userData.data().chatList;
 
-                if (chatListIds.length != 0) {
+                if (chatListIds) {
                     const promises = chatListIds.map(async (uid) => {
                         const docRef = doc(db, "users", uid);
                         const docSnap = await getDoc(docRef);

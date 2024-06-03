@@ -8,6 +8,7 @@ import { signOut } from 'firebase/auth'
 import { auth } from './firebase'
 import Profile from './pages/Profile'
 import PageNotFound from './pages/pageNotFound'
+import FullImg from './components/FullImg'
 
 function App() {
 
@@ -48,6 +49,7 @@ function App() {
         <Route path='/login' element={<Login />} />
         <Route path='/*' element={<PageNotFound />} />
       </Routes>
+      <FullImg />
     </BrowserRouter>
   )
 }
