@@ -12,8 +12,7 @@ const ChatHeader = () => {
                 <BootstrapTooltip title="back">
                     <button onClick={() => { setOtherUser(null) }}><ArrowBackIcon className='text-black'/></button>
                 </BootstrapTooltip>
-                {/* <img src={otherUser?.photoURL} width={'40px'} height={'40px'} alt="pp" className='rounded-[50%] object-cover' /> */}
-                <Avatar src={otherUser?.photoURL} width={'40px'} height={'40px'} alt="pp" />
+                <Avatar src={otherUser?.photoURL} width={'40px'} height={'40px'} />
             </div>
             <p className='flex-1 self-center'>{otherUser?.displayName}</p>
         </div>
