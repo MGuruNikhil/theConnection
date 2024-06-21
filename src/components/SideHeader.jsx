@@ -6,7 +6,7 @@ import { useNavigate } from 'react-router-dom';
 import PersonIcon from '@mui/icons-material/Person';
 import LogoutIcon from '@mui/icons-material/Logout';
 import BootstrapTooltip from '../materialUI/BootstrapTooltip';
-import Avatar from './Avatar';
+import MyAvatar from './MyAvatar';
 
 const SideHeader = () => {
     const { currentUser } = useContext(AuthContext);
@@ -29,7 +29,7 @@ const SideHeader = () => {
 
     return (
         <div className="SideHeader max-h-[56px] flex flex-row p-2 justify-between bg-gradient-to-r from-[#1f7474] to-[#88b430] overflow-hidden">
-            <Avatar src={photoURL} width={'40px'} height={'40px'} />
+            <MyAvatar src={photoURL} width={'40px'} height={'40px'} />
             <p className='self-center'>{displayName}</p>
             <div className='flex flex-row gap-4'>
                 <BootstrapTooltip title="Profile">

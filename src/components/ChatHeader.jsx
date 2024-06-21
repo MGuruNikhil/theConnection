@@ -2,7 +2,7 @@ import React, { useContext } from 'react'
 import { ChatContext } from '../context/ChatContext';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import BootstrapTooltip from '../materialUI/BootstrapTooltip';
-import Avatar from './Avatar';
+import MyAvatar from './MyAvatar';
 
 const ChatHeader = () => {
     const {otherUser, setOtherUser} = useContext(ChatContext);
@@ -12,7 +12,7 @@ const ChatHeader = () => {
                 <BootstrapTooltip title="back">
                     <button onClick={() => { setOtherUser(null) }}><ArrowBackIcon className='text-black'/></button>
                 </BootstrapTooltip>
-                <Avatar src={otherUser?.photoURL} width={'40px'} height={'40px'} />
+                <MyAvatar src={otherUser?.photoURL} width={'40px'} height={'40px'} />
             </div>
             <p className='flex-1 self-center'>{otherUser?.displayName}</p>
         </div>

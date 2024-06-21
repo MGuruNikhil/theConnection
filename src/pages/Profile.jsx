@@ -13,7 +13,7 @@ import PersonRemoveIcon from '@mui/icons-material/PersonRemove';
 import LogoutIcon from '@mui/icons-material/Logout';
 import { useNavigate } from "react-router-dom";
 import BootstrapTooltip from "../materialUI/BootstrapTooltip";
-import Avatar from "../components/Avatar";
+import MyAvatar from "../components/MyAvatar";
 
 const Profile = () => {
 
@@ -185,7 +185,7 @@ const Profile = () => {
 
             <div className="relative">
 
-                <Avatar width={'200px'} height={'200px'} src={currentUser.photoURL} className='border-2 border-solid border-[#1f7474]' />
+                <MyAvatar width={'200px'} height={'200px'} src={currentUser.photoURL} className='border-2 border-solid border-[#1f7474]' />
 
                 <div className="bg-gradient-to-br from-gray-700 to-gray-950 absolute bottom-2 right-2 z-10 flex gap-2 rounded-full hover:border-2 hover:border-solid hover:border-[#1f7474]" onMouseEnter={() => setShowButton(true)} onMouseLeave={() => setShowButton(false)}>
                     {showButton && (
