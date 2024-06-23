@@ -28,9 +28,9 @@ const Signup = () => {
     const handleSubmit = async (e) => {
         setIsLoading(true);
         e.preventDefault();
-        const displayName = e.target[0].value;
-        const email = e.target[1].value;
-        const password = e.target[2].value;
+        const displayName = e.target[0].value.trim();
+        const email = e.target[1].value.trim();
+        const password = e.target[2].value.trim();
         const photo = e.target[3].files[0];
 
         createUserWithEmailAndPassword(auth, email, password)

@@ -25,23 +25,24 @@ const SearchBar = () => {
 
     const handleSubmit = async () => {
         setIsLoading(true);
-        if (searchName.length > 0) {
+        const sName = searchName.trim();
+        if (sName.length > 0) {
             setSearchResults([]);
             setIsErr(false);
             let q;
             if (searchFilter === "displayName") {
-                const lowerSname = searchName.toLowerCase();
+                const lowerSname = sName.toLowerCase();
                 q = query(collection(db, 'users'), where('searchNames', 'array-contains', lowerSname));
             }
             else {
                 const emailPattern = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
-                const isValid = emailPattern.test(searchName);
+                const isValid = emailPattern.test(sName);
                 if (!isValid) {
                     setIsErr(true);
                     setErrMsg("Invalid Email ID");
                     return;
                 }
-                q = query(collection(db, "users"), where("email", "==", searchName));
+                q = query(collection(db, "users"), where("email", "==", sName));
             }
             try {
                 const querySnapshot = await getDocs(q);

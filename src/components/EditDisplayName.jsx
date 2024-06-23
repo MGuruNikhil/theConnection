@@ -32,14 +32,15 @@ const EditDisplayName = () => {
 
     const handleSubmit = async (e) => {
         if (e.code === 'Enter') {
-            if (editedText === "") {
+            const newName = editedText.trim();
+            if (newName === "") {
                 alert("This field cannot be empty");
                 return;
             }
             const docRef = doc(db, "users", currentUser.uid);
             const updateData = {};
-            updateData["displayName"] = editedText;
-            updateData["searchNames"] = getAllSubstrings(editedText);
+            updateData["displayName"] = newName;
+            updateData["searchNames"] = getAllSubstrings(newName);
             console.log(updateData);
             await updateProfile(currentUser, updateData);
             await updateDoc(docRef, updateData);

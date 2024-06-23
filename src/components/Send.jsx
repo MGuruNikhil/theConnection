@@ -14,7 +14,7 @@ const Send = () => {
     const [msg, setMsg] = useState('');
 
     const handleSend = async () => {
-        const message = msg;
+        const message = msg.trim();
         setMsg('');
         if (message != '') {
             await updateDoc(messageRef, {

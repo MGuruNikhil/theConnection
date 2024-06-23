@@ -15,8 +15,8 @@ const Login = () => {
     const handleSubmit = async (e) => {
         setIsLoading(true);
         e.preventDefault();
-        const email = e.target[0].value;
-        const password = e.target[1].value;
+        const email = e.target[0].value.trim();
+        const password = e.target[1].value.trim();
 
         signInWithEmailAndPassword(auth, email, password)
         .then((userCredential) => {
