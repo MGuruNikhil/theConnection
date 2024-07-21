@@ -132,8 +132,8 @@ const Signup = () => {
 
     return (
         <div className="container p-16 bg-gradient-to-br from-gray-700 to-gray-950 flex flex-col justify-center space-y-5 max-w-fit m-auto rounded-xl">
-            <h1 className="text-[3.2em] leading-110 text-[#86C232]">hotCHAT</h1>
-            <h2 className='text-[1.6em] text-[#61892F]'>Sign Up</h2>
+            <h1 className="theName text-[2.4em] font-bold text-[#86C232]">theConnection</h1>
+            <h2 className='signupLogin text-[1.6em] text-[#61892F]'>Sign Up</h2>
             <form onSubmit={handleSubmit} className="flex flex-col space-y-5">
                 <input className='p-2 border-b-2 border-b-[#86C232] focus:outline-none' type="text" name="displayName" id="displayName" placeholder='Enter name' />
                 <input className='p-2 border-b-2 border-b-[#86C232] focus:outline-none' type="email" name="email" id="email" placeholder='Enter email' />
