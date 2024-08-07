@@ -211,7 +211,7 @@ const Profile = () => {
             <div className="p-4 flex justify-between w-[70%] items-center rounded-xl bg-gradient-to-r from-[#004545] to-[#1f7474]">
                 <div className="flex flex-col items-start">
                     <p className="flex-shrink-0 inline-block whitespace-no-wrap text-[#ffffff] font-black">Email</p>
-                    <span className="text-[#86C232] font-semibold">{currentUser.email}</span>
+                    <span className="text-[#86C232] font-semibold break-all">{currentUser.email}</span>
                 </div>
                 <BootstrapTooltip title="edit disabled">
                     <EditOffIcon />
