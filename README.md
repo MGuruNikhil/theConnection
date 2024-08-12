@@ -8,8 +8,6 @@ theConnection is a real-time chat application built with React, Firebase, and Ma
 - [Installation](#installation)
 - [Usage](#usage)
 - [Project Structure](#project-structure)
-- [Contributing](#contributing)
-- [License](#license)
 
 ## Features
 
@@ -50,11 +48,53 @@ theConnection is a real-time chat application built with React, Firebase, and Ma
 
 ## Project Structure
 
+```sh
+.
+├── .env
+├── .eslintrc.cjs
+├── .gitignore
+├── index.css
+├── index.html
+├── package.json
+├── postcss.config.js
+├── public/
+├── README.md
+├── src/
+│   ├── App.jsx
+│   ├── assets/
+│   ├── components/
+│   │   ├── CACover.jsx
+│   │   ├── ChatArea.jsx
+│   │   ├── ChatHeader.jsx
+│   │   ├── ChatList.jsx
+│   │   ├── EditDisplayName.jsx
+│   │   ├── FullImg.jsx
+│   │   ├── Messages.jsx
+│   │   ├── MyAvatar.jsx
+│   │   ├── SearchBar.jsx
+│   │   ├── Send.jsx
+│   │   ├── Sidebar.jsx
+│   │   └── SideHeader.jsx
+│   ├── context/
+│   │   ├── AuthContext.jsx
+│   │   ├── ChatContext.jsx
+│   │   └── ImgContext.jsx
+│   ├── firebase.js
+│   ├── main.jsx
+│   ├── materialUI/
+│   │   └── ...
+│   └── pages/
+│       ├── Chat.jsx
+│       └── ...
+├── tailwind.config.js
+├── vercel.json
+└── vite.config.js
+```
 
 ### Key Files and Directories
 
 - [`src/firebase.js`](command:_github.copilot.openRelativePath?%5B%7B%22scheme%22%3A%22file%22%2C%22authority%22%3A%22%22%2C%22path%22%3A%22%2Fhome%2Fnikhil%2Fprogramming%2FtheConnection%2Fsrc%2Ffirebase.js%22%2C%22query%22%3A%22%22%2C%22fragment%22%3A%22%22%7D%5D "/home/nikhil/programming/theConnection/src/firebase.js"): Firebase configuration and initialization.
 - [`src/context/`](command:_github.copilot.openRelativePath?%5B%7B%22scheme%22%3A%22file%22%2C%22authority%22%3A%22%22%2C%22path%22%3A%22%2Fhome%2Fnikhil%2Fprogramming%2FtheConnection%2Fsrc%2Fcontext%2F%22%2C%22query%22%3A%22%22%2C%22fragment%22%3A%22%22%7D%5D "/home/nikhil/programming/theConnection/src/context/"): Context providers for authentication, chat, and image handling.
 - [`src/components/`](command:_github.copilot.openRelativePath?%5B%7B%22scheme%22%3A%22file%22%2C%22authority%22%3A%22%22%2C%22path%22%3A%22%2Fhome%2Fnikhil%2Fprogramming%2FtheConnection%2Fsrc%2Fcomponents%2F%22%2C%22query%22%3A%22%22%2C%22fragment%22%3A%22%22%7D%5D "/home/nikhil/programming/theConnection/src/components/"): Reusable UI components.
-- [`src/materialUI/FullWidthTabs.jsx`](command:_github.copilot.openRelativePath?%5B%7B%22scheme%22%3A%22file%22%2C%22authority%22%3A%22%22%2C%22path%22%3A%22%2Fhome%2Fnikhil%2Fprogramming%2FtheConnection%2Fsrc%2FmaterialUI%2FFullWidthTabs.jsx%22%2C%22query%22%3A%22%22%2C%22fragment%22%3A%22%22%7D%5D "/home/nikhil/programming/theConnection/src/materialUI/FullWidthTabs.jsx"): Custom Material-UI tabs component.
+- [`src/materialUI/`](command:_github.copilot.openRelativePath?%5B%7B%22scheme%22%3A%22file%22%2C%22authority%22%3A%22%22%2C%22path%22%3A%22%2Fhome%2Fnikhil%2Fprogramming%2FtheConnection%2Fsrc%2FmaterialUI%2F%22%2C%22query%22%3A%22%22%2C%22fragment%22%3A%22%22%7D%5D "/home/nikhil/programming/theConnection/src/materialUI/"): Custom Material-UI components.
 - [`src/pages/Chat.jsx`](command:_github.copilot.openRelativePath?%5B%7B%22scheme%22%3A%22file%22%2C%22authority%22%3A%22%22%2C%22path%22%3A%22%2Fhome%2Fnikhil%2Fprogramming%2FtheConnection%2Fsrc%2Fpages%2FChat.jsx%22%2C%22query%22%3A%22%22%2C%22fragment%22%3A%22%22%7D%5D "/home/nikhil/programming/theConnection/src/pages/Chat.jsx"): Main chat page.
