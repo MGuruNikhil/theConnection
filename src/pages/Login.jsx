@@ -1,8 +1,9 @@
 import React, { useState } from 'react'
-import { auth } from '../firebase.js'
-import { sendPasswordResetEmail, signInWithEmailAndPassword, signOut } from "firebase/auth";
+import { auth, db } from '../firebase.js'
+import { sendPasswordResetEmail, signInAnonymously, signInWithEmailAndPassword, signOut, updateProfile } from "firebase/auth";
 import { Link, useNavigate } from 'react-router-dom';
 import GradientCircularProgress from '../materialUI/GradientCircularProgress.jsx';
+import { doc, setDoc } from 'firebase/firestore';
 
 
 const Login = () => {
@@ -11,6 +12,7 @@ const Login = () => {
     const [isErr, setIsErr] = useState(false);
     const [error, setError] = useState("");
     const [isLoading, setIsLoading] = useState(false);
+    const [isLoadingGuest, setIsLoadingGuest] = useState(false);
 
     const handleSubmit = async (e) => {
         setIsLoading(true);
@@ -33,7 +35,6 @@ const Login = () => {
                 })
                 .catch((error) => {
                     setIsErr(true);
-                    const errorCode = error.code;
                     const errorMessage = error.message;
                     setError(errorMessage);
                 });
@@ -42,7 +43,6 @@ const Login = () => {
         })
         .catch((error) => {
             setIsErr(true);
-            const errorCode = error.code;
             const errorMessage = error.message;
             setError(errorMessage);
             setIsLoading(false);
@@ -58,11 +58,47 @@ const Login = () => {
         })
         .catch((error) => {
             setIsErr(true);
-            const errorCode = error.code;
             const errorMessage = error.message;
             setError(errorMessage);
         });
     };
+
+    const handleGuestLogin = async () => {
+        setIsLoadingGuest(true);
+        signInAnonymously(auth)
+            .then( async (userCredential) => {
+                const user = userCredential.user;
+                console.log(user);
+                console.log(userCredential);
+                setIsLoadingGuest(false);
+                await updateProfile(user, {
+                    displayName: "Guest",
+                    photoURL: "https://firebasestorage.googleapis.com/v0/b/hotchat-nik.appspot.com/o/profilePics%2FDummy.png?alt=media&token=a39fc600-99f7-490d-a670-c23dc37e8d53",
+                }).catch((error) => {
+                    setIsErr(true);
+                    const errorMessage = error.message;
+                    console.log(errorMessage);
+                    setError(errorMessage);
+                });
+                await setDoc(doc(db, "users", user.uid), {
+                    uid: user.uid,
+                    displayName: "Guest",
+                    photoURL: "https://firebasestorage.googleapis.com/v0/b/hotchat-nik.appspot.com/o/profilePics%2FDummy.png?alt=media&token=a39fc600-99f7-490d-a670-c23dc37e8d53",
+                }).catch((error) => {
+                    setIsErr(true);
+                    const errorMessage = error.message;
+                    console.log(errorMessage);
+                    setError(errorMessage);
+                });
+                navigate("/");
+            })
+            .catch((error) => {
+                setIsErr(true);
+                console.log(error.message);
+                setError(error.message);
+                setIsLoadingGuest(false);
+            });
+    }
 
     return (
         <div className="container p-16 bg-gradient-to-br from-gray-700 to-gray-950 flex flex-col justify-center space-y-5 max-w-fit rounded-xl">
@@ -81,6 +117,14 @@ const Login = () => {
                 <span className='flex-shrink-0 inline-block whitespace-no-wrap'>don't have an account ?</span>
                 <Link className='flex-shrink-0 inline-block whitespace-no-wrap font-medium text-[#646cff] no-underline hover:text-[#535bf2]' to="/signup">Sign Up</Link>
             </div>
+            <div className="p-2 flex items-center gap-2 text-[#61892F]">
+                <div className="h-[1px] bg-[#61892F] grow"></div>
+                <p>or</p>
+                <div className="h-[1px] bg-[#61892F] grow"></div>
+            </div>
+            <button onClick={handleGuestLogin} className='min-w-[232px] rounded-md border border-transparent py-2 px-4 text-base font-semibold font-inherit bg-[#1a1a1a] cursor-pointer transition-border-color duration-250 overflow-hidden text-[#86C232] focus:outline-none focus-visible:ring-4 focus-visible:ring-auto focus-visible:ring-[#86C232] hover:border-[#6a9317]'>
+                {isLoadingGuest ? <GradientCircularProgress /> : <>Guest Log in</>}
+            </button>
         </div>
     );
 }

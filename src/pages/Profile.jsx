@@ -45,7 +45,6 @@ const Profile = () => {
             const uploadTask = uploadBytesResumable(storageRef, photo);
             uploadTask.on(
                 (error) => {
-                    const errorCode = error.code;
                     const errorMessage = error.message;
                     console.log(errorMessage);
                 },
@@ -54,14 +53,12 @@ const Profile = () => {
                         await updateProfile(currentUser, {
                             photoURL: downloadURL,
                         }).catch((error) => {
-                            const errorCode = error.code;
                             const errorMessage = error.message;
                             console.log(errorMessage);
                         });
                         await updateDoc(doc(db, "users", currentUser.uid), {
                             photoURL: downloadURL,
                         }).catch((error) => {
-                            const errorCode = error.code;
                             const errorMessage = error.message;
                             console.log(errorMessage);
                         });
@@ -94,14 +91,12 @@ const Profile = () => {
         await updateProfile(currentUser, {
             photoURL: "https://firebasestorage.googleapis.com/v0/b/hotchat-nik.appspot.com/o/profilePics%2FDummy.png?alt=media&token=a39fc600-99f7-490d-a670-c23dc37e8d53",
         }).catch((error) => {
-            const errorCode = error.code;
             const errorMessage = error.message;
             console.log(errorMessage);
         });
         await updateDoc(doc(db, "users", currentUser.uid), {
             photoURL: "https://firebasestorage.googleapis.com/v0/b/hotchat-nik.appspot.com/o/profilePics%2FDummy.png?alt=media&token=a39fc600-99f7-490d-a670-c23dc37e8d53",
         }).catch((error) => {
-            const errorCode = error.code;
             const errorMessage = error.message;
             console.log(errorMessage);
         });
@@ -115,61 +110,64 @@ const Profile = () => {
         return EmailAuthProvider.credential(email, password);
     }
 
+    const deleteAcc = async () => {
+        const fileRef = ref(storage, 'profilePics/' + currentUser.uid + '.jpg');
+
+        getDownloadURL(fileRef).then(() => {
+            // File exists, proceed with deletion
+            deleteObject(fileRef)
+                .then(() => {
+                    console.log("File deleted successfully");
+                })
+                .catch((error) => {
+                    console.error("Error deleting file:", error);
+                });
+        }).catch((error) => {
+            if (error.code === "storage/object-not-found") {
+                console.log("File does not exist");
+            } else {
+                console.error("Error fetching download URL:", error);
+            }
+        });
+
+        const docRef = doc(db, "users", currentUser.uid);
+        const docSnap = await getDoc(docRef);
+        let chatList;
+        if (docSnap.exists()) {
+            chatList = docSnap.data().chatList;
+            if(chatList) {
+                for (let i = 0; i < chatList.length; i++) {
+                    const chatID = (currentUser.uid < chatList[i]) ? (currentUser.uid + "-" + chatList[i]) : (chatList[i] + "-" + currentUser.uid);
+                    await updateDoc(doc(db, "users", chatList[i]), {
+                        chatList: arrayRemove(currentUser.uid)
+                    });
+                    await deleteDoc(doc(db, "chat", chatID));
+                }
+            }
+            await deleteDoc(doc(db, "users", currentUser.uid));
+        } else {
+            console.log("No such document!");
+        }
+        await deleteUser(currentUser).then(() => {
+            console.log("Account Deleted Successfully")
+        }).catch((error) => {
+            const errorMessage = error.message;
+            console.log(errorMessage);
+        });
+    }
+
     const handleDelAcc = async () => {
         const confirmDelAcc = window.confirm('Are you sure you want to delete your account ?');
         if (confirmDelAcc) {
+            if(currentUser.isAnonymous) {
+                deleteAcc();
+                return;
+            }
+            
             const credential = promptForCredentials();
-
             reauthenticateWithCredential(currentUser, credential).then(async () => {
-                const fileRef = ref(storage, 'profilePics/' + currentUser.uid + '.jpg');
-
-                getDownloadURL(fileRef)
-                    .then(() => {
-                        // File exists, proceed with deletion
-                        deleteObject(fileRef)
-                            .then(() => {
-                                console.log("File deleted successfully");
-                            })
-                            .catch((error) => {
-                                console.error("Error deleting file:", error);
-                            });
-                    })
-                    .catch((error) => {
-                        if (error.code === "storage/object-not-found") {
-                            console.log("File does not exist");
-                        } else {
-                            console.error("Error fetching download URL:", error);
-                        }
-                    });
-                const docRef = doc(db, "users", currentUser.uid);
-                const docSnap = await getDoc(docRef);
-                let chatList;
-                if (docSnap.exists()) {
-                    chatList = docSnap.data().chatList;
-                    if(chatList) {
-                        for (let i = 0; i < chatList.length; i++) {
-                            const chatID = (currentUser.uid < chatList[i]) ? (currentUser.uid + "-" + chatList[i]) : (chatList[i] + "-" + currentUser.uid);
-                            await updateDoc(doc(db, "users", chatList[i]), {
-                                chatList: arrayRemove(currentUser.uid)
-                            });
-                            await deleteDoc(doc(db, "chat", chatID));
-                        }
-                    }
-                    await deleteDoc(doc(db, "users", currentUser.uid));
-                } else {
-                    console.log("No such document!");
-                }
-                await deleteUser(currentUser)
-                    .then(() => {
-                        console.log("Account Deleted Successfully")
-                    })
-                    .catch((error) => {
-                        const errorCode = error.code;
-                        const errorMessage = error.message;
-                        console.log(errorMessage);
-                    });
+                deleteAcc();
             }).catch((error) => {
-                const errorCode = error.code;
                 const errorMessage = error.message;
                 console.log(errorMessage);
             });

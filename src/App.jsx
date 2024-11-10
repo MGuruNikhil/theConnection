@@ -16,7 +16,7 @@ function App() {
 
   const AuthProtection = ({children}) => {
     if(currentUser != null && currentUser != {} && currentUser != undefined) {
-      if(!(currentUser.emailVerified)) {
+      if(!(currentUser.emailVerified) && !(currentUser.isAnonymous)) {
         signOut(auth)
         .then(() => {
             console.log('User logged out successfully');

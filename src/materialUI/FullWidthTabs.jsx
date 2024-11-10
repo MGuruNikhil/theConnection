@@ -84,7 +84,9 @@ export default function FullWidthTabs(props) {
 					dir={theme.direction}
 				>
 					{(props.isLoading) ?
-						<GradientCircularProgress /> : 
+						<div className='w-full p-2'>
+							<GradientCircularProgress />
+						</div> : 
 						<>
 							{(props.searchResults.length != 0) && props.searchResults.map((result, i) => (
 							<div key={i} onClick={() => props.handleResultClick(i)} className="resultItem max-h-[56px] flex flex-row p-2 gap-x-2 border-b-solid border-b-black border-b-2 overflow-hidden cursor-pointer">
