@@ -18,25 +18,13 @@ import MyAvatar from "../components/MyAvatar";
 const Profile = () => {
 
     const { currentUser } = useContext(AuthContext);
+    const myCategory = (currentUser.isAnonymous) ? 'guests' : 'users';
 
     const [showButton, setShowButton] = useState(false);
 
     const navigate = useNavigate();
 
     console.log(currentUser);
-
-    const handleLogout = () => {
-        const confirmLogout = window.confirm('Are you sure you want to log out ?');
-        if (confirmLogout) {
-            signOut(auth)
-                .then(() => {
-                    console.log('User logged out successfully');
-                })
-                .catch((error) => {
-                    console.error('Error during logout:', error);
-                });
-        }
-    };
 
     const handleEditPP = (e) => {
         const photo = e.target.files[0];
@@ -56,7 +44,7 @@ const Profile = () => {
                             const errorMessage = error.message;
                             console.log(errorMessage);
                         });
-                        await updateDoc(doc(db, "users", currentUser.uid), {
+                        await updateDoc(doc(db, myCategory, currentUser.uid), {
                             photoURL: downloadURL,
                         }).catch((error) => {
                             const errorMessage = error.message;
@@ -94,7 +82,7 @@ const Profile = () => {
             const errorMessage = error.message;
             console.log(errorMessage);
         });
-        await updateDoc(doc(db, "users", currentUser.uid), {
+        await updateDoc(doc(db, myCategory, currentUser.uid), {
             photoURL: "https://firebasestorage.googleapis.com/v0/b/hotchat-nik.appspot.com/o/profilePics%2FDummy.png?alt=media&token=a39fc600-99f7-490d-a670-c23dc37e8d53",
         }).catch((error) => {
             const errorMessage = error.message;
@@ -116,9 +104,9 @@ const Profile = () => {
         getDownloadURL(fileRef).then(() => {
             // File exists, proceed with deletion
             deleteObject(fileRef)
-                .then(() => {
-                    console.log("File deleted successfully");
-                })
+            .then(() => {
+                console.log("File deleted successfully");
+            })
                 .catch((error) => {
                     console.error("Error deleting file:", error);
                 });
@@ -130,7 +118,8 @@ const Profile = () => {
             }
         });
 
-        const docRef = doc(db, "users", currentUser.uid);
+        const myList = (myCategory === 'users') ? 'chatList' : 'guestList';
+        const docRef = doc(db, myCategory, currentUser.uid);
         const docSnap = await getDoc(docRef);
         let chatList;
         if (docSnap.exists()) {
@@ -139,12 +128,26 @@ const Profile = () => {
                 for (let i = 0; i < chatList.length; i++) {
                     const chatID = (currentUser.uid < chatList[i]) ? (currentUser.uid + "-" + chatList[i]) : (chatList[i] + "-" + currentUser.uid);
                     await updateDoc(doc(db, "users", chatList[i]), {
-                        chatList: arrayRemove(currentUser.uid)
+                        [myList]: arrayRemove(currentUser.uid)
                     });
-                    await deleteDoc(doc(db, "chat", chatID));
+                    if(currentUser.isAnonymous) {
+                        await deleteDoc(doc(db, "guestChats", chatID));
+                    } else {
+                        await deleteDoc(doc(db, "chats", chatID));
+                    }
                 }
             }
-            await deleteDoc(doc(db, "users", currentUser.uid));
+            chatList = docSnap.data().guestList;
+            if(chatList) {
+                for (let i = 0; i < chatList.length; i++) {
+                    const chatID = (currentUser.uid < chatList[i]) ? (currentUser.uid + "-" + chatList[i]) : (chatList[i] + "-" + currentUser.uid);
+                    await updateDoc(doc(db, "guests", chatList[i]), {
+                        [myList]: arrayRemove(currentUser.uid)
+                    });
+                    await deleteDoc(doc(db, "guestChats", chatID));
+                }
+            }
+            await deleteDoc(doc(db, myCategory, currentUser.uid));
         } else {
             console.log("No such document!");
         }
@@ -155,6 +158,27 @@ const Profile = () => {
             console.log(errorMessage);
         });
     }
+    
+    const handleLogout = () => {
+        if(currentUser.isAnonymous) {
+            const confirmLogout = window.confirm('Since this is a temporary account, your account will be deleted if u log out, Are you sure you want to log out ?');
+            if (confirmLogout) {
+                deleteAcc();
+                return;
+            }
+        } else {
+            const confirmLogout = window.confirm('Are you sure you want to log out ?');
+            if (confirmLogout) {
+                signOut(auth)
+                    .then(() => {
+                        console.log('User logged out successfully');
+                    })
+                    .catch((error) => {
+                        console.error('Error during logout:', error);
+                    });
+            }
+        }
+    };
 
     const handleDelAcc = async () => {
         const confirmDelAcc = window.confirm('Are you sure you want to delete your account ?');

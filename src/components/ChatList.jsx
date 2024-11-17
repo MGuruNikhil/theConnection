@@ -6,18 +6,19 @@ import { ChatContext } from '../context/ChatContext';
 import GradientCircularProgress from '../materialUI/GradientCircularProgress';
 import MyAvatar from './MyAvatar';
 
-const ChatList = () => {
+const ChatList = ({chatList, setChatList}) => {
     const { currentUser } = useContext(AuthContext);
     const { otherUser, setOtherUser } = useContext(ChatContext);
-    const [chatList, setChatList] = useState([]);
+    const myCategory = (currentUser.isAnonymous) ? 'guests' : 'users';
     const [isLoading, setIsLoading] = useState(false);
 
     useEffect(() => {
         const renderList = async () => {
-            const unsub = onSnapshot(doc(db, "users", currentUser.uid), async (userData) => {
+            const unsub = onSnapshot(doc(db, myCategory, currentUser.uid), async (userData) => {
                 setIsLoading(true);
                 const resp = [];
                 const chatListIds = userData.data().chatList;
+                const guestListIds = userData.data().guestList;
 
                 if (chatListIds) {
                     const promises = chatListIds.map(async (uid) => {
@@ -28,6 +29,17 @@ const ChatList = () => {
                     await Promise.all(promises);
                     setChatList(resp);
                 }
+
+                if(guestListIds) {
+                    const promises = guestListIds.map(async (uid) => {
+                        const docRef = doc(db, "guests", uid);
+                        const docSnap = await getDoc(docRef);
+                        resp.push(docSnap.data());
+                    });
+                    await Promise.all(promises);
+                    setChatList(resp);
+                }
+
                 setIsLoading(false);
             });
             return () => {

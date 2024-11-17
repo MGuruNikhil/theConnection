@@ -11,6 +11,7 @@ import BootstrapTooltip from "../materialUI/BootstrapTooltip";
 const EditDisplayName = () => {
 
     const { currentUser } = useContext(AuthContext);
+    const myCategory = currentUser.isAnonymous ? 'guests' : 'users';
     const [isEdit, setIsEdit] = useState(false);
     const [editedText, setEditedText] = useState(currentUser["displayName"]);
     const inputRef = useRef(null);
@@ -37,7 +38,7 @@ const EditDisplayName = () => {
                 alert("This field cannot be empty");
                 return;
             }
-            const docRef = doc(db, "users", currentUser.uid);
+            const docRef = doc(db, myCategory, currentUser.uid);
             const updateData = {};
             updateData["displayName"] = newName;
             updateData["searchNames"] = getAllSubstrings(newName);

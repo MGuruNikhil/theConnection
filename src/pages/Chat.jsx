@@ -6,6 +6,7 @@ import { ChatContext } from '../context/ChatContext';
 const Chat = () => {
 
     const { otherUser } = useContext(ChatContext);
+    const [chatList, setChatList] = useState([]);
     const [matches, setMatches] = useState(window.matchMedia("(min-width: 768px)").matches);
 
     useEffect(() => {
@@ -17,18 +18,18 @@ const Chat = () => {
         <>
             {matches && (
                 <div className="container min-w-[768px] w-[80%] h-full m-auto rounded-xl self-center overflow-hidden flex flex-row">
-                    <Sidebar />
-                    <ChatArea />
+                    <Sidebar chatList={chatList} setChatList={setChatList}/>
+                    <ChatArea chatList={chatList}/>
                 </div>
             )}
             {(!matches && otherUser==null) && (
                 <div className="container w-[80%] h-full m-auto rounded-xl self-center overflow-hidden">
-                    <Sidebar />
+                    <Sidebar chatList={chatList} setChatList={setChatList}/>
                 </div>                
             )}
             {(!matches && otherUser!=null) && (
                 <div className="container w-[80%] h-full m-auto rounded-xl self-center overflow-hidden">
-                    <ChatArea />
+                    <ChatArea chatList={chatList}/>
                 </div>
             )}
         </>

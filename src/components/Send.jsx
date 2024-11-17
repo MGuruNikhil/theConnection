@@ -10,7 +10,12 @@ const Send = () => {
     const { currentUser } = useContext(AuthContext);
     const { otherUser } = useContext(ChatContext);
     const ChatID = (currentUser.uid < otherUser?.uid) ? (currentUser.uid + "-" + otherUser?.uid) : (otherUser?.uid + "-" + currentUser.uid);
-    const messageRef = doc(db, "chats", ChatID);
+    let messageRef;
+    if(currentUser.isAnonymous || 'isAnonymous' in otherUser) {
+        messageRef = doc(db, "guestChats", ChatID);
+    } else {
+        messageRef = doc(db, "chats", ChatID);
+    }
     const [msg, setMsg] = useState('');
 
     const handleSend = async () => {

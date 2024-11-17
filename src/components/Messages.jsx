@@ -13,7 +13,8 @@ const Messages = () => {
 
     useEffect(() => {
         const renderMessages = () => {
-            const unsub = onSnapshot(doc(db, "chats", ChatID), (chats) => {
+            const chatCategory = ((currentUser.isAnonymous) || ('isAnonymous' in otherUser) ) ? 'guestChats' : 'chats';
+            const unsub = onSnapshot(doc(db, chatCategory, ChatID), (chats) => {
                 setChats(chats.data().messages);
             });
             return () => {
@@ -21,7 +22,7 @@ const Messages = () => {
             };
         };
         otherUser?.uid && renderMessages();
-    }, [otherUser?.uid]);
+    }, [otherUser?.uid, currentUser.uid, ChatID]);
 
     useEffect(() => {
         const div = divRef.current;

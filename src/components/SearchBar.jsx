@@ -26,12 +26,12 @@ const SearchBar = () => {
     const handleSubmit = async () => {
         setIsLoading(true);
         const sName = searchName.trim();
+        const lowerSname = sName.toLowerCase();
         if (sName.length > 0) {
             setSearchResults([]);
             setIsErr(false);
             let q;
             if (searchFilter === "displayName") {
-                const lowerSname = sName.toLowerCase();
                 q = query(collection(db, 'users'), where('searchNames', 'array-contains', lowerSname));
             }
             else {
@@ -50,6 +50,12 @@ const SearchBar = () => {
                 querySnapshot.forEach((doc) => {
                     results.push(doc.data());
                 });
+                if(searchFilter == "displayName") {
+                    const guestQuerySnapshot = await getDocs(query(collection(db, 'guests'), where('searchNames', 'array-contains', lowerSname)));
+                    guestQuerySnapshot.forEach((doc) => {
+                        results.push(doc.data());
+                    });
+                }
                 console.log(results);
                 if (results.length == 0) {
                     setIsErr(true);
@@ -74,13 +80,21 @@ const SearchBar = () => {
         const theirUID = clickedResult.uid;
         const myUID = currentUser.uid;
         const chatID = (myUID < theirUID) ? (myUID + "-" + theirUID) : (theirUID + "-" + myUID);
-        await updateDoc(doc(db, "users", myUID), {
-            chatList: arrayUnion(theirUID)
+        const myCategory = (currentUser.isAnonymous) ? 'guests' : 'users';
+        const theirCategory = ('isAnonymous' in clickedResult) ? 'guests' : 'users';
+        const myList = (theirCategory === 'users') ? 'chatList' : 'guestList';
+        const theirList = (myCategory === 'users') ? 'chatList' : 'guestList';
+        await updateDoc(doc(db, myCategory, myUID), {
+            [myList]: arrayUnion(theirUID)
         });
-        await updateDoc(doc(db, "users", theirUID), {
-            chatList: arrayUnion(myUID)
+        await updateDoc(doc(db, theirCategory, theirUID), {
+            [theirList]: arrayUnion(myUID)
         });
-        await setDoc(doc(db, "chats", chatID), {});
+        if(myCategory === 'guests' || theirCategory === 'guests') {
+            await setDoc(doc(db, "guestChats", chatID), {});
+        } else {
+            await setDoc(doc(db, "chats", chatID), {});
+        }
         setOtherUser(searchResults[index]);
         setSearchName("");
         setSearchResults([]);
