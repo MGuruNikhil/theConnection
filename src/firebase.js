@@ -15,14 +15,17 @@ const firebaseConfig = {
 
 export const app = initializeApp(firebaseConfig);
 export const auth = getAuth(app);
-// Initialize auth with persistence
-await setPersistence(auth, browserLocalPersistence);
 
 // Initialize Firestore with persistence
 const db = initializeFirestore(app, {
   localCache: persistentLocalCache({
     tabManager: persistentSingleTabManager()
   })
+});
+
+// Setup auth persistence
+setPersistence(auth, browserLocalPersistence).catch(error => {
+  console.error("Error setting auth persistence:", error);
 });
 
 export { db };
