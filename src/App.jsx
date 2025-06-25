@@ -1,5 +1,5 @@
-import { useContext } from 'react'
-import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom'
+import { useContext, useEffect } from 'react'
+import { BrowserRouter, Navigate, Route, Routes, useNavigate } from 'react-router-dom'
 import Signup from './pages/Signup'
 import Login from './pages/Login'
 import Chat from './pages/Chat'
@@ -11,25 +11,50 @@ import PageNotFound from './pages/pageNotFound'
 import FullImg from './components/FullImg'
 
 function App() {
+  const { currentUser, loading } = useContext(AuthContext);
 
-  const {currentUser} = useContext(AuthContext);
+  const AuthProtection = ({ children }) => {
+    const navigate = useNavigate();
 
-  const AuthProtection = ({children}) => {
-    if(currentUser != null && currentUser != {} && currentUser != undefined) {
-      if(!(currentUser.emailVerified) && !(currentUser.isAnonymous)) {
-        signOut(auth)
-        .then(() => {
-            console.log('User logged out successfully');
-        })
-        .catch((error) => {
-            console.error('Error during logout:', error);
-        });
-      }
+    useEffect(() => {
+      // Check if auth state is still valid
+      const checkAuth = async () => {
+        try {
+          // Get current auth token
+          const token = await auth.currentUser?.getIdToken(true);
+          if (!token) {
+            navigate('/login');
+          }
+        } catch (error) {
+          console.error('Auth token error:', error);
+          navigate('/login');
+        }
+      };
+
+      checkAuth();
+    }, [navigate]);
+
+    if (loading) {
+      return <div>Loading...</div>;
     }
-    else {
-      return <Navigate to={"/login"} />
+
+    if (!currentUser) {
+      return <Navigate to="/login" />;
     }
+
+    // For email users, verify email
+    if (!currentUser.isAnonymous && !currentUser.emailVerified) {
+      signOut(auth).catch(error => {
+        console.error('Error during logout:', error);
+      });
+      return <Navigate to="/login" />;
+    }
+
     return children;
+  };
+
+  if (loading) {
+    return <div>Loading...</div>;
   }
 
   return (
@@ -45,13 +70,17 @@ function App() {
             <Profile />
           </AuthProtection>
         }/>
-        <Route path='/signup' element={<Signup />} />
-        <Route path='/login' element={<Login />} />
+        <Route path='/signup' element={
+          currentUser ? <Navigate to="/" /> : <Signup />
+        } />
+        <Route path='/login' element={
+          currentUser ? <Navigate to="/" /> : <Login />
+        } />
         <Route path='/*' element={<PageNotFound />} />
       </Routes>
       <FullImg />
     </BrowserRouter>
-  )
+  );
 }
 
 export default App
