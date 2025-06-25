@@ -192,6 +192,17 @@ const SearchBar = () => {
                     }}
                     value={searchText}
                 />
+                {isFocus && (
+                    <BootstrapTooltip title="search">
+                        <button
+                            onClick={() => !isLoading && handleSubmit()}
+                            className='px-3 hover:bg-gray-700 transition-colors disabled:opacity-50'
+                            disabled={isLoading}
+                        >
+                            <SearchIcon />
+                        </button>
+                    </BootstrapTooltip>
+                )}
             </div>
             {isFocus && (
                 <div className="search-results-container bg-inherit">
