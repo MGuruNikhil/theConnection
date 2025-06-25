@@ -24,7 +24,7 @@ const ChatArea = ({chatList}) => {
 
     if(otherUser) {
         return (
-            <div className="ChatArea w-2/3 flex flex-col">
+            <div className="ChatArea w-full md:w-2/3 flex flex-col">
                 <ChatHeader />
                 <Messages />
                 <Send />
@@ -33,7 +33,7 @@ const ChatArea = ({chatList}) => {
     }
     else {
         return (
-            <div className="ChatArea w-2/3 flex flex-col">
+            <div className="ChatArea w-full md:w-2/3 flex flex-col">
                 <CACover />
             </div>
         );
