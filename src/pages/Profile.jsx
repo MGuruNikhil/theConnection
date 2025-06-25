@@ -5,254 +5,499 @@ import { deleteUser, reauthenticateWithCredential, signOut, updateProfile, Email
 import { ref, uploadBytesResumable, getDownloadURL, deleteObject } from "firebase/storage";
 import { doc, updateDoc, getDoc, arrayRemove, deleteDoc } from "firebase/firestore";
 import EditDisplayName from "../components/EditDisplayName";
-import ArrowBackIcon from '@mui/icons-material/ArrowBack';
-import EditIcon from '@mui/icons-material/Edit';
-import EditOffIcon from '@mui/icons-material/EditOff';
-import CloseIcon from '@mui/icons-material/Close';
-import PersonRemoveIcon from '@mui/icons-material/PersonRemove';
-import LogoutIcon from '@mui/icons-material/Logout';
 import { useNavigate } from "react-router-dom";
-import BootstrapTooltip from "../materialUI/BootstrapTooltip";
 import MyAvatar from "../components/MyAvatar";
+import { ArrowLeft, Edit, X, UserX, LogOut, Lock, Loader2 } from "lucide-react";
+import { cn } from "@/lib/utils";
+import { Card, CardContent } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import {
+    Tooltip,
+    TooltipContent,
+    TooltipProvider,
+    TooltipTrigger,
+} from "@/components/ui/tooltip";
+import {
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+    AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
+import { useToast } from "@/hooks/use-toast";
 
 const Profile = () => {
-
     const { currentUser } = useContext(AuthContext);
-    const myCategory = (currentUser.isAnonymous) ? 'guests' : 'users';
-
+    const myCategory = currentUser.isAnonymous ? 'guests' : 'users';
     const [showButton, setShowButton] = useState(false);
-
+    const [isDeleting, setIsDeleting] = useState(false);
+    const [isLoggingOut, setIsLoggingOut] = useState(false);
     const navigate = useNavigate();
+    const { toast } = useToast();
 
-    console.log(currentUser);
+    const [isUpdatingPP, setIsUpdatingPP] = useState(false);
+    const [uploadProgress, setUploadProgress] = useState(0);
 
-    const handleEditPP = (e) => {
+    const handleEditPP = async (e) => {
         const photo = e.target.files[0];
         if (photo) {
-            const storageRef = ref(storage, 'profilePics/' + currentUser.uid + '.jpg');
-            const uploadTask = uploadBytesResumable(storageRef, photo);
-            uploadTask.on(
-                (error) => {
-                    const errorMessage = error.message;
-                    console.log(errorMessage);
-                },
-                () => {
-                    getDownloadURL(uploadTask.snapshot.ref).then(async (downloadURL) => {
-                        await updateProfile(currentUser, {
-                            photoURL: downloadURL,
-                        }).catch((error) => {
-                            const errorMessage = error.message;
-                            console.log(errorMessage);
+            try {
+                setIsUpdatingPP(true);
+                setShowButton(false);
+                toast({
+                    title: "Uploading",
+                    description: "Your profile picture is being updated...",
+                });
+
+                const storageRef = ref(storage, 'profilePics/' + currentUser.uid + '.jpg');
+                const uploadTask = uploadBytesResumable(storageRef, photo);
+
+                uploadTask.on(
+                    'state_changed',
+                    (snapshot) => {
+                        const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+                        setUploadProgress(progress);
+                    },
+                    (error) => {
+                        toast({
+                            title: "Error",
+                            description: error.message,
+                            variant: "destructive",
                         });
-                        await updateDoc(doc(db, myCategory, currentUser.uid), {
-                            photoURL: downloadURL,
-                        }).catch((error) => {
-                            const errorMessage = error.message;
-                            console.log(errorMessage);
-                        });
-                    });
-                }
-            );
-            setShowButton(false);
+                        setIsUpdatingPP(false);
+                    },
+                    async () => {
+                        try {
+                            const downloadURL = await getDownloadURL(uploadTask.snapshot.ref);
+                            
+                            await Promise.all([
+                                updateProfile(currentUser, {
+                                    photoURL: downloadURL,
+                                }),
+                                updateDoc(doc(db, myCategory, currentUser.uid), {
+                                    photoURL: downloadURL,
+                                })
+                            ]);
+
+                            // Force refresh the auth state to update UI
+                            await auth.currentUser.reload();
+                            
+                            toast({
+                                title: "Success",
+                                description: "Profile picture updated successfully",
+                            });
+                            
+                            // Force re-render by updating state
+                            setIsUpdatingPP(false);
+                            setUploadProgress(0);
+                        } catch (error) {
+                            toast({
+                                title: "Error",
+                                description: error.message,
+                                variant: "destructive",
+                            });
+                            setIsUpdatingPP(false);
+                        }
+                    }
+                );
+            } catch (error) {
+                toast({
+                    title: "Error",
+                    description: error.message,
+                    variant: "destructive",
+                });
+                setIsUpdatingPP(false);
+            }
         }
-    }
+    };
 
     const handleRemovePP = async () => {
-        const fileRef = ref(storage, 'profilePics/' + currentUser.uid + '.jpg');
-        getDownloadURL(fileRef)
-            .then(() => {
-                deleteObject(fileRef)
-                    .then(() => {
-                        console.log("File deleted successfully");
-                    })
-                    .catch((error) => {
-                        console.error("Error deleting file:", error);
-                    });
-            })
-            .catch((error) => {
-                if (error.code === "storage/object-not-found") {
-                    console.log("File does not exist");
-                } else {
-                    console.error("Error fetching download URL:", error);
+        try {
+            const fileRef = ref(storage, 'profilePics/' + currentUser.uid + '.jpg');
+            try {
+                await getDownloadURL(fileRef);
+                await deleteObject(fileRef);
+            } catch (error) {
+                if (error.code !== "storage/object-not-found") {
+                    throw error;
                 }
-            });
-        await updateProfile(currentUser, {
-            photoURL: "https://firebasestorage.googleapis.com/v0/b/hotchat-nik.appspot.com/o/profilePics%2FDummy.png?alt=media&token=a39fc600-99f7-490d-a670-c23dc37e8d53",
-        }).catch((error) => {
-            const errorMessage = error.message;
-            console.log(errorMessage);
-        });
-        await updateDoc(doc(db, myCategory, currentUser.uid), {
-            photoURL: "https://firebasestorage.googleapis.com/v0/b/hotchat-nik.appspot.com/o/profilePics%2FDummy.png?alt=media&token=a39fc600-99f7-490d-a670-c23dc37e8d53",
-        }).catch((error) => {
-            const errorMessage = error.message;
-            console.log(errorMessage);
-        });
-        setShowButton(false);
-    }
+            }
 
+            const defaultPhotoURL = "https://firebasestorage.googleapis.com/v0/b/hotchat-nik.appspot.com/o/profilePics%2FDummy.png?alt=media&token=a39fc600-99f7-490d-a670-c23dc37e8d53";
+            await updateProfile(currentUser, { photoURL: defaultPhotoURL });
+            await updateDoc(doc(db, myCategory, currentUser.uid), { photoURL: defaultPhotoURL });
+            
+            toast({
+                title: "Success",
+                description: "Profile picture removed successfully",
+            });
+        } catch (error) {
+            toast({
+                title: "Error",
+                description: error.message,
+                variant: "destructive",
+            });
+        }
+        setShowButton(false);
+    };
 
     const promptForCredentials = () => {
         const email = currentUser.email;
-        const password = prompt("To delete your account, enter password : ");
+        const password = prompt("To delete your account, enter password:");
         return EmailAuthProvider.credential(email, password);
-    }
+    };
+
+    const handleDelAccStart = async () => {
+        try {
+            setIsDeleting(true);
+            if (currentUser.isAnonymous) {
+                await deleteAcc();
+            } else {
+                const credential = promptForCredentials();
+                await reauthenticateWithCredential(currentUser, credential);
+                await deleteAcc();
+            }
+        } catch (error) {
+            toast({
+                title: "Error",
+                description: error.message,
+                variant: "destructive",
+            });
+            setIsDeleting(false);
+        }
+    };
 
     const deleteAcc = async () => {
-        const fileRef = ref(storage, 'profilePics/' + currentUser.uid + '.jpg');
-
-        getDownloadURL(fileRef).then(() => {
-            // File exists, proceed with deletion
-            deleteObject(fileRef)
-            .then(() => {
-                console.log("File deleted successfully");
-            })
-                .catch((error) => {
-                    console.error("Error deleting file:", error);
-                });
-        }).catch((error) => {
-            if (error.code === "storage/object-not-found") {
-                console.log("File does not exist");
-            } else {
-                console.error("Error fetching download URL:", error);
+        setIsDeleting(true);
+        try {
+            // Delete profile picture if exists
+            const fileRef = ref(storage, 'profilePics/' + currentUser.uid + '.jpg');
+            try {
+                await getDownloadURL(fileRef);
+                await deleteObject(fileRef);
+            } catch (error) {
+                if (error.code !== "storage/object-not-found") {
+                    throw error;
+                }
             }
-        });
 
-        const myList = (myCategory === 'users') ? 'chatList' : 'guestList';
-        const docRef = doc(db, myCategory, currentUser.uid);
-        const docSnap = await getDoc(docRef);
-        let chatList;
-        if (docSnap.exists()) {
-            chatList = docSnap.data().chatList;
-            if(chatList) {
-                for (let i = 0; i < chatList.length; i++) {
-                    const chatID = (currentUser.uid < chatList[i]) ? (currentUser.uid + "-" + chatList[i]) : (chatList[i] + "-" + currentUser.uid);
-                    await updateDoc(doc(db, "users", chatList[i]), {
-                        [myList]: arrayRemove(currentUser.uid)
-                    });
-                    if(currentUser.isAnonymous) {
+            const docRef = doc(db, myCategory, currentUser.uid);
+            const docSnap = await getDoc(docRef);
+            
+            if (docSnap.exists()) {
+                // Handle regular chat list (user-to-user or guest-to-user)
+                const chatList = docSnap.data().chatList;
+                if (chatList) {
+                    await Promise.all(chatList.map(async (chatPartner) => {
+                        const chatID = currentUser.uid < chatPartner ? 
+                            currentUser.uid + "-" + chatPartner : 
+                            chatPartner + "-" + currentUser.uid;
+                        
+                        // Remove current user from partner's list
+                        await updateDoc(doc(db, "users", chatPartner), {
+                            chatList: arrayRemove(currentUser.uid),
+                            guestList: arrayRemove(currentUser.uid)
+                        });
+                        
+                        // Delete chat document
+                        await deleteDoc(doc(db, currentUser.isAnonymous ? "guestChats" : "chats", chatID));
+                    }));
+                }
+
+                // Handle guest chat list
+                const guestList = docSnap.data().guestList;
+                if (guestList) {
+                    await Promise.all(guestList.map(async (chatPartner) => {
+                        const chatID = currentUser.uid < chatPartner ? 
+                            currentUser.uid + "-" + chatPartner : 
+                            chatPartner + "-" + currentUser.uid;
+                        
+                        // Remove current user from partner's list
+                        await updateDoc(doc(db, "guests", chatPartner), {
+                            chatList: arrayRemove(currentUser.uid),
+                            guestList: arrayRemove(currentUser.uid)
+                        });
+                        
+                        // Delete chat document
                         await deleteDoc(doc(db, "guestChats", chatID));
-                    } else {
-                        await deleteDoc(doc(db, "chats", chatID));
-                    }
+                    }));
                 }
+
+                // Delete user's document
+                await deleteDoc(docRef);
             }
-            chatList = docSnap.data().guestList;
-            if(chatList) {
-                for (let i = 0; i < chatList.length; i++) {
-                    const chatID = (currentUser.uid < chatList[i]) ? (currentUser.uid + "-" + chatList[i]) : (chatList[i] + "-" + currentUser.uid);
-                    await updateDoc(doc(db, "guests", chatList[i]), {
-                        [myList]: arrayRemove(currentUser.uid)
-                    });
-                    await deleteDoc(doc(db, "guestChats", chatID));
-                }
-            }
-            await deleteDoc(doc(db, myCategory, currentUser.uid));
-        } else {
-            console.log("No such document!");
+
+            await deleteUser(currentUser);
+            toast({
+                title: "Success",
+                description: "Account deleted successfully",
+            });
+        } catch (error) {
+            toast({
+                title: "Error",
+                description: error.message,
+                variant: "destructive",
+            });
+        } finally {
+            setIsDeleting(false);
         }
-        await deleteUser(currentUser).then(() => {
-            console.log("Account Deleted Successfully")
-        }).catch((error) => {
-            const errorMessage = error.message;
-            console.log(errorMessage);
-        });
-    }
-    
-    const handleLogout = () => {
-        if(currentUser.isAnonymous) {
-            const confirmLogout = window.confirm('Since this is a temporary account, your account will be deleted if u log out, Are you sure you want to log out ?');
-            if (confirmLogout) {
-                deleteAcc();
-                return;
-            }
-        } else {
-            const confirmLogout = window.confirm('Are you sure you want to log out ?');
-            if (confirmLogout) {
-                signOut(auth)
-                    .then(() => {
-                        console.log('User logged out successfully');
-                    })
-                    .catch((error) => {
-                        console.error('Error during logout:', error);
-                    });
+    };
+
+    const handleLogout = async () => {
+        if (window.confirm('Are you sure you want to log out?')) {
+            try {
+                setIsLoggingOut(true);
+                await signOut(auth);
+                toast.success('Logged out successfully');
+                navigate('/login');
+            } catch (error) {
+                console.error(error);
+                toast.error('Error logging out');
+                setIsLoggingOut(false);
             }
         }
     };
 
     const handleDelAcc = async () => {
-        const confirmDelAcc = window.confirm('Are you sure you want to delete your account ?');
-        if (confirmDelAcc) {
-            if(currentUser.isAnonymous) {
-                deleteAcc();
-                return;
+        if (currentUser.isAnonymous) {
+            await deleteAcc();
+        } else {
+            try {
+                const credential = promptForCredentials();
+                await reauthenticateWithCredential(currentUser, credential);
+                await deleteAcc();
+            } catch (error) {
+                toast({
+                    title: "Error",
+                    description: error.message,
+                    variant: "destructive",
+                });
             }
-            
-            const credential = promptForCredentials();
-            reauthenticateWithCredential(currentUser, credential).then(async () => {
-                deleteAcc();
-            }).catch((error) => {
-                const errorMessage = error.message;
-                console.log(errorMessage);
-            });
         }
-    }
+    };
 
     return (
-        <div className="container min-w-[480px] relative bg-gradient-to-br from-gray-700 to-gray-950 flex flex-col justify-center items-center w-[50%] h-full m-auto rounded-xl gap-4">
-            
-            <BootstrapTooltip title="back">
-                <button onClick={() => { navigate("/") }} className="absolute top-2 left-2 z-10 bg-[#88b430] rounded-full cursor-pointer p-2 flex items-center justify-center"><ArrowBackIcon className="text-black"/></button>
-            </BootstrapTooltip>
+        <div className="mx-auto flex min-h-screen w-full items-center justify-center px-4 py-8">
+            <Card className="relative w-full max-w-4xl shadow-lg">
+                <TooltipProvider>
+                    <Tooltip>
+                        <TooltipTrigger asChild>
+                            <Button
+                                variant="outline"
+                                size="icon"
+                                className="absolute left-4 top-4"
+                                onClick={() => navigate("/")}
+                            >
+                                <ArrowLeft className="h-4 w-4" />
+                            </Button>
+                        </TooltipTrigger>
+                        <TooltipContent>Back</TooltipContent>
+                    </Tooltip>
+                </TooltipProvider>
 
-            <div className="relative">
+                <CardContent className="mt-8 space-y-8 p-10">
+                    <div className="relative mx-auto w-fit">
+                        <div className="relative">
+                            <MyAvatar
+                                width="200px"
+                                height="200px"
+                                src={currentUser.photoURL}
+                                className={cn(
+                                    "rounded-full border-4 border-primary",
+                                    isUpdatingPP && "opacity-50"
+                                )}
+                            />
+                            {isUpdatingPP && (
+                                <div className="absolute inset-0 flex items-center justify-center">
+                                    <div className="text-primary text-sm font-medium">
+                                        {Math.round(uploadProgress)}%
+                                    </div>
+                                </div>
+                            )}
+                        </div>
 
-                <MyAvatar width={'200px'} height={'200px'} src={currentUser.photoURL} className='border-2 border-solid border-[#1f7474]' />
+                        <div
+                            className="absolute bottom-2 right-2 z-10 flex gap-2 rounded-full"
+                            onMouseEnter={() => setShowButton(true)}
+                            onMouseLeave={() => setShowButton(false)}
+                        >
+                            {showButton && (
+                                <TooltipProvider>
+                                    <Tooltip>
+                                        <TooltipTrigger asChild>
+                                            <Button
+                                                variant="destructive"
+                                                size="icon"
+                                                onClick={handleRemovePP}
+                                            >
+                                                <X className="h-4 w-4" />
+                                            </Button>
+                                        </TooltipTrigger>
+                                        <TooltipContent>Remove picture</TooltipContent>
+                                    </Tooltip>
+                                </TooltipProvider>
+                            )}
+                            <TooltipProvider>
+                                <Tooltip>
+                                    <TooltipTrigger asChild>
+                                        <label htmlFor="ppUpload">
+                                            <Button
+                                                variant="default"
+                                                size="icon"
+                                                className="cursor-pointer"
+                                                asChild
+                                            >
+                                                <div>
+                                                    <Edit className="h-4 w-4" />
+                                                </div>
+                                            </Button>
+                                        </label>
+                                    </TooltipTrigger>
+                                    <TooltipContent>Edit picture</TooltipContent>
+                                </Tooltip>
+                            </TooltipProvider>
+                        </div>
 
-                <div className="bg-gradient-to-br from-gray-700 to-gray-950 absolute bottom-2 right-2 z-10 flex gap-2 rounded-full hover:border-2 hover:border-solid hover:border-[#1f7474]" onMouseEnter={() => setShowButton(true)} onMouseLeave={() => setShowButton(false)}>
-                    {showButton && (
-                        <BootstrapTooltip title="remove picture">
-                            <button onClick={handleRemovePP} className="bg-[#6B6E70] rounded-full cursor-pointer p-2 flex items-center justify-center">
-                                <CloseIcon className='text-black'/>
-                            </button>
-                        </BootstrapTooltip>
-                    )}
-                    <BootstrapTooltip title="edit">
-                        <label for="ppUpload" className="bg-[#88b430] rounded-full cursor-pointer p-2 flex items-center justify-center">
-                            <EditIcon className="text-black"/>
-                        </label>
-                    </BootstrapTooltip>
-                </div>
+                        <input
+                            className="hidden"
+                            type="file"
+                            accept="image/*"
+                            id="ppUpload"
+                            onChange={handleEditPP}
+                        />
+                    </div>
 
-                <input className="hidden" type="file" accept="image/*" id="ppUpload" onChange={handleEditPP} />
+                    <EditDisplayName label="Display Name" fbkey="displayName" />
 
-            </div>
+                    <div className="rounded-lg bg-secondary p-6">
+                        <div className="flex items-center justify-between">
+                            <div className="space-y-1.5">
+                                <p className="font-medium text-lg">Email</p>
+                                <p className="text-sm text-muted-foreground">
+                                    {currentUser.email}
+                                </p>
+                            </div>
+                            <TooltipProvider>
+                                <Tooltip>
+                                    <TooltipTrigger>
+                                        <Lock className="h-4 w-4 text-muted-foreground" />
+                                    </TooltipTrigger>
+                                    <TooltipContent>Edit disabled</TooltipContent>
+                                </Tooltip>
+                            </TooltipProvider>
+                        </div>
+                    </div>
 
-            <EditDisplayName label="Display Name" fbkey="displayName" />
-            
-            <div className="p-4 flex justify-between w-[70%] items-center rounded-xl bg-gradient-to-r from-[#004545] to-[#1f7474]">
-                <div className="flex flex-col items-start">
-                    <p className="flex-shrink-0 inline-block whitespace-no-wrap text-[#ffffff] font-black">Email</p>
-                    <span className="text-[#86C232] font-semibold break-all">{currentUser.email}</span>
-                </div>
-                <BootstrapTooltip title="edit disabled">
-                    <EditOffIcon />
-                </BootstrapTooltip>
-            </div>
+                    <div className="mt-6 flex flex-col gap-4">
+                        <AlertDialog>
+                            <AlertDialogTrigger asChild>
+                                <Button
+                                    variant="destructive"
+                                    disabled={isDeleting || isLoggingOut}
+                                    className="w-full"
+                                >
+                                    {isDeleting ? (
+                                        <>
+                                            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                            Deleting...
+                                        </>
+                                    ) : (
+                                        <>
+                                            <UserX className="mr-2 h-4 w-4" />
+                                            Delete Account
+                                        </>
+                                    )}
+                                </Button>
+                            </AlertDialogTrigger>
+                            <AlertDialogContent>
+                                <AlertDialogHeader>
+                                    <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+                                    <AlertDialogDescription>
+                                        This action cannot be undone. This will permanently delete your
+                                        account and remove your data from our servers.
+                                        {currentUser.isAnonymous && (
+                                            <p className="mt-2 font-medium text-destructive">
+                                                Note: This is a temporary guest account.
+                                            </p>
+                                        )}
+                                    </AlertDialogDescription>
+                                </AlertDialogHeader>
+                                <AlertDialogFooter>
+                                    <AlertDialogCancel disabled={isDeleting}>Cancel</AlertDialogCancel>
+                                    <AlertDialogAction
+                                        onClick={handleDelAccStart}
+                                        disabled={isDeleting}
+                                        className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                                    >
+                                        {isDeleting ? (
+                                            <>
+                                                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                                Deleting...
+                                            </>
+                                        ) : (
+                                            "Delete Account"
+                                        )}
+                                    </AlertDialogAction>
+                                </AlertDialogFooter>
+                            </AlertDialogContent>
+                        </AlertDialog>
 
-            <div className="flex flex-row gap-2">
-                <button onClick={handleDelAcc} className='gap-2 border border-transparent text-base font-semibold cursor-pointer transition-border-color duration-250 overflow-hidden text-black focus-visible:ring-4 focus-visible:ring-auto focus-visible:ring-[#842029] bg-[#DC3545] h-[40px] px-4 py-2 rounded-full focus:outline-none flex items-center justify-center'>
-                    <PersonRemoveIcon />
-                    Delete Account
-                </button>
-                <button onClick={handleLogout} className='gap-2 border border-transparent text-base font-semibold cursor-pointer transition-border-color duration-250 overflow-hidden text-black focus-visible:ring-4 focus-visible:ring-auto focus-visible:ring-[#997404] bg-[#FFC107] h-[40px] px-4 py-2 rounded-full focus:outline-none flex items-center justify-center'>
-                    <LogoutIcon />
-                    Log Out
-                </button>
-            </div>
-
+                        <AlertDialog>
+                            <AlertDialogTrigger asChild>
+                                <Button
+                                    variant="secondary"
+                                    disabled={isDeleting || isLoggingOut}
+                                    className="w-full"
+                                >
+                                    {isLoggingOut ? (
+                                        <>
+                                            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                            Logging out...
+                                        </>
+                                    ) : (
+                                        <>
+                                            <LogOut className="mr-2 h-4 w-4" />
+                                            Logout
+                                        </>
+                                    )}
+                                </Button>
+                            </AlertDialogTrigger>
+                            <AlertDialogContent>
+                                <AlertDialogHeader>
+                                    <AlertDialogTitle>Are you sure you want to log out?</AlertDialogTitle>
+                                    {currentUser.isAnonymous && (
+                                        <AlertDialogDescription>
+                                            Since this is a temporary account, your account will be deleted if you log out.
+                                        </AlertDialogDescription>
+                                    )}
+                                </AlertDialogHeader>
+                                <AlertDialogFooter>
+                                    <AlertDialogCancel disabled={isLoggingOut}>Cancel</AlertDialogCancel>
+                                    <AlertDialogAction
+                                        onClick={handleLogout}
+                                        disabled={isLoggingOut}
+                                    >
+                                        {isLoggingOut ? (
+                                            <>
+                                                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                                Logging out...
+                                            </>
+                                        ) : (
+                                            "Log Out"
+                                        )}
+                                    </AlertDialogAction>
+                                </AlertDialogFooter>
+                            </AlertDialogContent>
+                        </AlertDialog>
+                    </div>
+                </CardContent>
+            </Card>
         </div>
-    )
-}
+    );
+};
 
 export default Profile;

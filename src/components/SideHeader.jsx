@@ -3,114 +3,190 @@ import { auth, db, storage } from '../firebase';
 import { deleteUser, signOut } from 'firebase/auth';
 import { AuthContext } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
-import PersonIcon from '@mui/icons-material/Person';
-import LogoutIcon from '@mui/icons-material/Logout';
-import BootstrapTooltip from '../materialUI/BootstrapTooltip';
+import { User, LogOut } from "lucide-react";
 import MyAvatar from './MyAvatar';
 import { deleteObject, getDownloadURL, ref } from 'firebase/storage';
 import { arrayRemove, deleteDoc, doc, getDoc, updateDoc } from 'firebase/firestore';
+import { Button } from "@/components/ui/button"
+import {
+    Tooltip,
+    TooltipContent,
+    TooltipProvider,
+    TooltipTrigger,
+} from "@/components/ui/tooltip"
+import {
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+    AlertDialogTrigger,
+} from "@/components/ui/alert-dialog"
+import { useToast } from "@/hooks/use-toast"
 
 const SideHeader = () => {
     const { currentUser } = useContext(AuthContext);
     const displayName = currentUser.displayName;
     const photoURL = currentUser.photoURL;
     const navigate = useNavigate();
+    const { toast } = useToast();
 
     const deleteAnonAcc = async () => {
-        const fileRef = ref(storage, 'profilePics/' + currentUser.uid + '.jpg');
-
-        getDownloadURL(fileRef).then(() => {
-            // File exists, proceed with deletion
-            deleteObject(fileRef)
-            .then(() => {
-                console.log("File deleted successfully");
-            })
-                .catch((error) => {
-                    console.error("Error deleting file:", error);
-                });
-        }).catch((error) => {
-            if (error.code === "storage/object-not-found") {
-                console.log("File does not exist");
-            } else {
-                console.error("Error fetching download URL:", error);
-            }
-        });
-
-        const docRef = doc(db, "guests", currentUser.uid);
-        const docSnap = await getDoc(docRef);
-        let chatList;
-        if (docSnap.exists()) {
-            chatList = docSnap.data().chatList;
-            if(chatList) {
-                for (let i = 0; i < chatList.length; i++) {
-                    const chatID = (currentUser.uid < chatList[i]) ? (currentUser.uid + "-" + chatList[i]) : (chatList[i] + "-" + currentUser.uid);
-                    await updateDoc(doc(db, "users", chatList[i]), {
-                        guestList: arrayRemove(currentUser.uid)
-                    });
-                    await deleteDoc(doc(db, "guestChats", chatID));
+        try {
+            // Handle profile picture deletion
+            const fileRef = ref(storage, 'profilePics/' + currentUser.uid + '.jpg');
+            try {
+                await getDownloadURL(fileRef);
+                await deleteObject(fileRef);
+            } catch (error) {
+                if (error.code !== "storage/object-not-found") {
+                    console.error("Error handling profile picture:", error);
                 }
             }
-            chatList = docSnap.data().guestList;
-            if(chatList) {
-                for (let i = 0; i < chatList.length; i++) {
-                    const chatID = (currentUser.uid < chatList[i]) ? (currentUser.uid + "-" + chatList[i]) : (chatList[i] + "-" + currentUser.uid);
-                    await updateDoc(doc(db, "guests", chatList[i]), {
-                        guestList: arrayRemove(currentUser.uid)
-                    });
-                    await deleteDoc(doc(db, "guestChats", chatID));
-                }
-            }
-            await deleteDoc(doc(db, "guests", currentUser.uid));
-        } else {
-            console.log("No such document!");
-        }
-        await deleteUser(currentUser).then(() => {
-            console.log("Account Deleted Successfully")
-        }).catch((error) => {
-            const errorMessage = error.message;
-            console.log(errorMessage);
-        });
-    }
 
-    const handleLogout = () => {
-        let confirmLogout;
-        if(currentUser.isAnonymous) {
-            confirmLogout = window.confirm('Since this is a temporary account, your account will be deleted if u log out, Are you sure you want to log out ?');
-        } else {
-            confirmLogout = window.confirm('Are you sure you want to log out ?');
-        }
-        if (confirmLogout) {
-            if(currentUser.isAnonymous) {
-                deleteAnonAcc();
-                return;
+            // Handle chat data deletion
+            const docRef = doc(db, "guests", currentUser.uid);
+            const docSnap = await getDoc(docRef);
+            
+            if (docSnap.exists()) {
+                const userData = docSnap.data();
+                
+                // Handle user chats
+                if (userData.chatList) {
+                    for (const chatPartnerId of userData.chatList) {
+                        const chatID = currentUser.uid < chatPartnerId 
+                            ? currentUser.uid + "-" + chatPartnerId 
+                            : chatPartnerId + "-" + currentUser.uid;
+                        
+                        await updateDoc(doc(db, "users", chatPartnerId), {
+                            guestList: arrayRemove(currentUser.uid)
+                        });
+                        await deleteDoc(doc(db, "guestChats", chatID));
+                    }
+                }
+
+                // Handle guest chats
+                if (userData.guestList) {
+                    for (const chatPartnerId of userData.guestList) {
+                        const chatID = currentUser.uid < chatPartnerId 
+                            ? currentUser.uid + "-" + chatPartnerId 
+                            : chatPartnerId + "-" + currentUser.uid;
+                        
+                        await updateDoc(doc(db, "guests", chatPartnerId), {
+                            guestList: arrayRemove(currentUser.uid)
+                        });
+                        await deleteDoc(doc(db, "guestChats", chatID));
+                    }
+                }
+
+                await deleteDoc(docRef);
             }
-            signOut(auth)
-            .then(() => {
-                console.log('User logged out successfully');
-            })
-            .catch((error) => {
-                console.error('Error during logout:', error);
+
+            await deleteUser(currentUser);
+            
+            toast({
+                title: "Success",
+                description: "Guest account deleted successfully",
             });
+        } catch (error) {
+            toast({
+                title: "Error",
+                description: error.message,
+                variant: "destructive",
+            });
+            console.error("Error deleting guest account:", error);
+        }
+    };
+
+    const handleLogout = async () => {
+        try {
+            if (currentUser.isAnonymous) {
+                await deleteAnonAcc();
+            } else {
+                await signOut(auth);
+                toast({
+                    title: "Success",
+                    description: "Logged out successfully",
+                });
+            }
+        } catch (error) {
+            toast({
+                title: "Error",
+                description: "Failed to log out. Please try again.",
+                variant: "destructive",
+            });
+            console.error('Error during logout:', error);
         }
     };
 
     return (
-        <div className="SideHeader max-h-[56px] flex flex-row p-2 justify-between bg-gradient-to-r from-[#1f7474] to-[#88b430] overflow-hidden">
-            <MyAvatar src={photoURL} width={'40px'} height={'40px'} />
-            <p className='self-center'>{displayName}</p>
-            <div className='flex flex-row gap-4'>
-                <BootstrapTooltip title="Profile">
-                    <button onClick={()=>{navigate("/profile")}}>
-                        <PersonIcon className='text-[#000000]'/>
-                    </button>
-                </BootstrapTooltip>
-                <BootstrapTooltip title="log Out">
-                    <button onClick={handleLogout}>
-                        <LogoutIcon className='text-[#000000]'/>
-                    </button>
-                </BootstrapTooltip>
+        <header className="flex h-14 items-center justify-between border-b bg-gradient-to-r from-muted to-accent px-4 py-2">
+            <div className="flex items-center gap-3">
+                <MyAvatar 
+                    src={photoURL} 
+                    width="40px" 
+                    height="40px" 
+                />
+                <span className="text-sm font-medium">
+                    {displayName}
+                </span>
             </div>
-        </div>
+
+            <div className="flex items-center gap-2">
+                <TooltipProvider>
+                    <Tooltip>
+                        <TooltipTrigger asChild>
+                            <Button
+                                variant="ghost"
+                                size="icon"
+                                onClick={() => navigate("/profile")}
+                            >
+                                <User className="h-5 w-5" />
+                            </Button>
+                        </TooltipTrigger>
+                        <TooltipContent>Profile</TooltipContent>
+                    </Tooltip>
+                </TooltipProvider>
+
+                <AlertDialog>
+                    <TooltipProvider>
+                        <Tooltip>
+                            <TooltipTrigger asChild>
+                                <AlertDialogTrigger asChild>
+                                    <Button
+                                        variant="ghost"
+                                        size="icon"
+                                    >
+                                        <LogOut className="h-5 w-5" />
+                                    </Button>
+                                </AlertDialogTrigger>
+                            </TooltipTrigger>
+                            <TooltipContent>Log out</TooltipContent>
+                        </Tooltip>
+                    </TooltipProvider>
+
+                    <AlertDialogContent>
+                        <AlertDialogHeader>
+                            <AlertDialogTitle>Are you sure you want to log out?</AlertDialogTitle>
+                            {currentUser.isAnonymous && (
+                                <AlertDialogDescription>
+                                    Since this is a temporary account, your account will be deleted if you log out.
+                                </AlertDialogDescription>
+                            )}
+                        </AlertDialogHeader>
+                        <AlertDialogFooter>
+                            <AlertDialogCancel>Cancel</AlertDialogCancel>
+                            <AlertDialogAction onClick={handleLogout}>
+                                Log out
+                            </AlertDialogAction>
+                        </AlertDialogFooter>
+                    </AlertDialogContent>
+                </AlertDialog>
+            </div>
+        </header>
     );
 };
 

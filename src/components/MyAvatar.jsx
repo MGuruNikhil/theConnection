@@ -1,13 +1,44 @@
 import React, { useContext } from 'react'
 import { ImgContext } from '../context/ImgContext'
-import Avatar from '@mui/material/Avatar';
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar"
+import { cn } from "@/lib/utils"
+import { User } from "lucide-react"
 
-const MyAvatar = (props) => {
-
+const MyAvatar = ({ width, height, src, className }) => {
     const { setIsActive, setImgUrl } = useContext(ImgContext);
+
+    const handleClick = () => {
+        setImgUrl(src);
+        setIsActive(true);
+    };
+
     return (
-        <div onClick={(e) => e.stopPropagation()} className={`flex items-center justify-center max-w-[${props.width}] max-h-[${props.height}] min-w-[${props.width}] min-h-[${props.height}]`}>
-            <Avatar onClick={() => {setImgUrl(props.src); setIsActive(true);}} src={props.src} sx={{ width: props.width, height: props.height }} alt='profile picture' className={`${props.className} cursor-pointer hover:border-2 hover:border-solid hover:border-[#9d1919]`} />
+        <div
+            onClick={(e) => e.stopPropagation()}
+            style={{ 
+                maxWidth: width, 
+                maxHeight: height,
+                minWidth: width,
+                minHeight: height 
+            }}
+            className="flex items-center justify-center"
+        >
+            <Avatar
+                onClick={handleClick}
+                className={cn(
+                    "cursor-pointer hover:ring-2 hover:ring-primary",
+                    className
+                )}
+                style={{ 
+                    width, 
+                    height 
+                }}
+            >
+                <AvatarImage src={src} alt="Profile picture" />
+                <AvatarFallback>
+                    <User className="h-6 w-6" />
+                </AvatarFallback>
+            </Avatar>
         </div>
     )
 }

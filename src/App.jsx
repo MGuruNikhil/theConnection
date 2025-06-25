@@ -9,6 +9,7 @@ import { auth } from './firebase'
 import Profile from './pages/Profile'
 import PageNotFound from './pages/pageNotFound'
 import FullImg from './components/FullImg'
+import { Card } from '@/components/ui/card'
 
 function App() {
   const { currentUser, loading } = useContext(AuthContext);
@@ -35,7 +36,13 @@ function App() {
     }, [navigate]);
 
     if (loading) {
-      return <div>Loading...</div>;
+      return (
+        <div className="flex h-screen w-screen items-center justify-center">
+          <Card className="p-4">
+            <div className="text-foreground">Loading...</div>
+          </Card>
+        </div>
+      );
     }
 
     if (!currentUser) {
@@ -54,31 +61,39 @@ function App() {
   };
 
   if (loading) {
-    return <div>Loading...</div>;
+    return (
+      <div className="flex h-screen w-screen items-center justify-center">
+        <Card className="p-4">
+          <div className="text-foreground">Loading...</div>
+        </Card>
+      </div>
+    );
   }
 
   return (
     <BrowserRouter>
-      <Routes>
-        <Route path='/' element={
-          <AuthProtection>
-            <Chat />
-          </AuthProtection>
-        } />
-        <Route path='/profile' element={
-          <AuthProtection>
-            <Profile />
-          </AuthProtection>
-        }/>
-        <Route path='/signup' element={
-          currentUser ? <Navigate to="/" /> : <Signup />
-        } />
-        <Route path='/login' element={
-          currentUser ? <Navigate to="/" /> : <Login />
-        } />
-        <Route path='/*' element={<PageNotFound />} />
-      </Routes>
-      <FullImg />
+      <div className="min-h-screen bg-background">
+        <Routes>
+          <Route path='/' element={
+            <AuthProtection>
+              <Chat />
+            </AuthProtection>
+          } />
+          <Route path='/profile' element={
+            <AuthProtection>
+              <Profile />
+            </AuthProtection>
+          }/>
+          <Route path='/signup' element={
+            currentUser ? <Navigate to="/" /> : <Signup />
+          } />
+          <Route path='/login' element={
+            currentUser ? <Navigate to="/" /> : <Login />
+          } />
+          <Route path='/*' element={<PageNotFound />} />
+        </Routes>
+        <FullImg />
+      </div>
     </BrowserRouter>
   );
 }

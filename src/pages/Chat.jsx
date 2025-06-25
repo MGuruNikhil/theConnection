@@ -2,11 +2,14 @@ import React, { useContext, useEffect, useState } from 'react';
 import Sidebar from '../components/Sidebar';
 import ChatArea from '../components/ChatArea';
 import { ChatContext } from '../context/ChatContext';
+import { cn } from "@/lib/utils"
 
 const Chat = () => {
     const { otherUser } = useContext(ChatContext);
     const [chatList, setChatList] = useState([]);
-    const [matches, setMatches] = useState(window.matchMedia("(min-width: 768px)").matches);
+    const [matches, setMatches] = useState(
+        window.matchMedia("(min-width: 768px)").matches
+    );
 
     useEffect(() => {
         const mediaQuery = window.matchMedia("(min-width: 768px)");
@@ -15,28 +18,48 @@ const Chat = () => {
         return () => mediaQuery.removeEventListener('change', handler);
     }, []);
 
-    useEffect(() => {
-        console.log('Chat Component State:', { otherUser, isMobile: !matches });
-    }, [otherUser, matches]);
-
-    // For desktop view (>= 768px)
     if (matches) {
         return (
-            <div className="container min-w-[768px] w-[80%] h-full m-auto rounded-xl self-center overflow-hidden flex flex-row">
-                <Sidebar chatList={chatList} setChatList={setChatList} />
-                <ChatArea chatList={chatList} />
+            <div className="flex min-h-screen items-center justify-center p-4">
+                <div className="flex h-[80vh] w-full overflow-hidden rounded-lg border bg-background shadow-lg sm:w-full md:w-[768px] lg:w-[1024px] xl:w-[1280px]">
+                    <Sidebar 
+                        chatList={chatList} 
+                        setChatList={setChatList}
+                        className="w-[320px] flex-shrink-0 border-r"
+                    />
+                    <ChatArea 
+                        chatList={chatList}
+                        className="flex-1 min-w-0"
+                    />
+                </div>
             </div>
         );
     }
 
-    // For mobile view (< 768px)
     return (
-        <div className="container w-full h-full m-auto rounded-xl self-center overflow-hidden">
-            <div className={`${otherUser === null ? 'block' : 'hidden'} w-full h-full`}>
-                <Sidebar chatList={chatList} setChatList={setChatList} />
+        <div className="fixed inset-0 bg-background">
+            <div
+                className={cn(
+                    "fixed inset-0 w-full transition-all duration-300 ease-in-out",
+                    otherUser === null ? "translate-x-0" : "-translate-x-full"
+                )}
+            >
+                <Sidebar 
+                    chatList={chatList} 
+                    setChatList={setChatList}
+                    className="h-full w-full"
+                />
             </div>
-            <div className={`${otherUser !== null ? 'block' : 'hidden'} w-full h-full`}>
-                <ChatArea chatList={chatList} />
+            <div
+                className={cn(
+                    "fixed inset-0 w-full transition-all duration-300 ease-in-out",
+                    otherUser !== null ? "translate-x-0" : "translate-x-full"
+                )}
+            >
+                <ChatArea 
+                    chatList={chatList}
+                    className="h-full w-full"
+                />
             </div>
         </div>
     );

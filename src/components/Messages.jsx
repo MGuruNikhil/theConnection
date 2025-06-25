@@ -3,42 +3,67 @@ import { AuthContext } from '../context/AuthContext';
 import { ChatContext } from '../context/ChatContext';
 import { doc, onSnapshot } from 'firebase/firestore';
 import { db } from '../firebase';
+import { ScrollArea } from "@/components/ui/scroll-area"
+import { cn } from "@/lib/utils"
 
 const Messages = () => {
-    const {currentUser} = useContext(AuthContext);
-    const {otherUser} = useContext(ChatContext);
-    const ChatID = (currentUser.uid < otherUser?.uid)?(currentUser.uid+"-"+otherUser?.uid):(otherUser?.uid+"-"+currentUser.uid);
+    const { currentUser } = useContext(AuthContext);
+    const { otherUser } = useContext(ChatContext);
+    const ChatID = currentUser.uid < otherUser?.uid 
+        ? currentUser.uid + "-" + otherUser?.uid 
+        : otherUser?.uid + "-" + currentUser.uid;
     const [chats, setChats] = useState([]);
-    const divRef = useRef(null);
+    const scrollRef = useRef(null);
 
     useEffect(() => {
         const renderMessages = () => {
-            const chatCategory = ((currentUser.isAnonymous) || ('isAnonymous' in otherUser) ) ? 'guestChats' : 'chats';
+            const chatCategory = (currentUser.isAnonymous || 'isAnonymous' in otherUser) 
+                ? 'guestChats' 
+                : 'chats';
+            
             const unsub = onSnapshot(doc(db, chatCategory, ChatID), (chats) => {
                 setChats(chats.data().messages);
             });
+            
             return () => {
                 unsub();
             };
         };
+        
         otherUser?.uid && renderMessages();
     }, [otherUser?.uid, currentUser.uid, ChatID]);
 
     useEffect(() => {
-        const div = divRef.current;
-        if (div) {
-          div.scrollTop = div.scrollHeight;
+        if (scrollRef.current) {
+            scrollRef.current.scrollTo({ top: scrollRef.current.scrollHeight, behavior: 'smooth' });
         }
     }, [chats]);
 
     return (
-        <div className='bg-gradient-to-br from-gray-700 to-gray-950 flex-1 overflow-hidden'>
-            <div ref={divRef} className="w-full h-full bg-[url('https://www.transparenttextures.com/patterns/asfalt-light.png')] flex flex-col gap-2 overflow-scroll p-2 scrollbar-hidden">
-                {chats && chats.map((chat, index) => (  
-                    <div key={index} className={`break-words max-w-[90%] ${chat.from === currentUser.uid ? 'place-self-end rounded-tr-none bg-gradient-to-bl from-[#207175] to-[#88b430]' : 'place-self-start rounded-tl-none bg-gradient-to-br from-[#207175] to-[#c13434]'} px-4 py-2 rounded-xl text-start`}>{chat.message}</div>
+        <ScrollArea ref={scrollRef} className="flex-1 bg-muted/30">
+            <div className="flex flex-col gap-2 p-4">
+                {chats?.map((chat, index) => (
+                    <div
+                        key={chat.id || index}
+                        className={cn(
+                            "flex w-full",
+                            chat.from === currentUser.uid ? "justify-end" : "justify-start"
+                        )}
+                    >
+                        <div
+                            className={cn(
+                                "max-w-[85%] rounded-xl px-4 py-2 text-sm",
+                                chat.from === currentUser.uid
+                                    ? "bg-primary text-primary-foreground"
+                                    : "bg-muted text-muted-foreground"
+                            )}
+                        >
+                            {chat.message}
+                        </div>
+                    </div>
                 ))}
             </div>
-        </div>
+        </ScrollArea>
     );
 }
 

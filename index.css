@@ -2,15 +2,88 @@
 @tailwind components;
 @tailwind utilities;
 
+@layer base {
+  :root {
+    --background: 0 0% 100%;
+    --foreground: 0 0% 3.9%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 0 0% 3.9%;
+ 
+    --popover: 0 0% 100%;
+    --popover-foreground: 0 0% 3.9%;
+ 
+    --primary: 0 0% 9%;
+    --primary-foreground: 0 0% 98%;
+ 
+    --secondary: 0 0% 96.1%;
+    --secondary-foreground: 0 0% 9%;
+ 
+    --muted: 0 0% 96.1%;
+    --muted-foreground: 0 0% 45.1%;
+ 
+    --accent: 0 0% 96.1%;
+    --accent-foreground: 0 0% 9%;
+ 
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 0 0% 98%;
+
+    --border: 0 0% 89.8%;
+    --input: 0 0% 89.8%;
+    --ring: 0 0% 3.9%;
+ 
+    --radius: 0.5rem;
+  }
+ 
+  .dark {
+    --background: 0 0% 3.9%;
+    --foreground: 0 0% 98%;
+ 
+    --card: 0 0% 3.9%;
+    --card-foreground: 0 0% 98%;
+ 
+    --popover: 0 0% 3.9%;
+    --popover-foreground: 0 0% 98%;
+ 
+    --primary: 0 0% 98%;
+    --primary-foreground: 0 0% 9%;
+ 
+    --secondary: 0 0% 14.9%;
+    --secondary-foreground: 0 0% 98%;
+ 
+    --muted: 0 0% 14.9%;
+    --muted-foreground: 0 0% 63.9%;
+ 
+    --accent: 0 0% 14.9%;
+    --accent-foreground: 0 0% 98%;
+ 
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 0 0% 98%;
+ 
+    --border: 0 0% 14.9%;
+    --input: 0 0% 14.9%;
+    --ring: 0 0% 83.1%;
+  }
+}
+ 
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+}
+
 input:-webkit-autofill,
 input:-webkit-autofill:hover, 
 input:-webkit-autofill:focus, 
-input:-webkit-autofill:active{
-    -webkit-box-shadow: 0 0 0 30px #2B2A33 inset !important;
+input:-webkit-autofill:active {
+    -webkit-box-shadow: 0 0 0 30px hsl(var(--background)) inset !important;
 }
 
-input:-webkit-autofill{
-    -webkit-text-fill-color: #ffffff !important;
+input:-webkit-autofill {
+    -webkit-text-fill-color: hsl(var(--foreground)) !important;
 }
 
 .scrollbar-hidden::-webkit-scrollbar {
@@ -23,53 +96,48 @@ input:-webkit-autofill{
 }
 
 :root {
-    color: #ffffff;
-    /* background-color: #6B6E70; */
     font-synthesis: none;
     line-height: 1.5rem;
     text-rendering: optimizeLegibility;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
-    height: 100vh;
+}
+
+#root {
+    min-height: 100vh;
+    min-width: 100vw;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 input[type="text"], input[type="email"], input[type="password"], input[type="number"] {
-    background-color: #2B2A33;
-    min-width: 232px;
+    background-color: hsl(var(--background));
+    border-color: hsl(var(--input));
+    color: hsl(var(--foreground));
+}
+
+.auth-card {
+    width: 100%;
+    min-width: min(400px, calc(100vw - 2rem));
+    max-width: 480px;
 }
 
 a:hover {
     color: #747bff;
 }
-.container {
-    box-shadow: rgba(0, 0, 0, 0.35) 0px 5px 15px;
-}
+
 
 @media screen and (max-width: 480px) {
     #root {
         padding: 0;
-    }
-    .login, .profile, .signup, .container {
-        height: 100%;
-        width: 100%;
-        max-width: 100%;
-        min-width: 0px;
-        border-radius: 0;
     }
     .Send {
         position: fixed;
         bottom: 0;
         right: 0;
         left: 0;
-        border: 2px solid #86C232;
-        border-top: none;
-        border-radius: 0.5rem;
-    }
-    .theName {
-        font-size: 2rem;
-    }
-    .signupLogin {
-        font-size: 1.2rem;
+        border-radius: 0;
     }
 }
 

@@ -3,11 +3,18 @@ import { db } from '../firebase';
 import { collection, getDocs, query, where, updateDoc, arrayUnion, setDoc, doc } from 'firebase/firestore';
 import { AuthContext } from '../context/AuthContext';
 import { ChatContext } from '../context/ChatContext';
-import ArrowBackIcon from '@mui/icons-material/ArrowBack';
-import SearchIcon from '@mui/icons-material/Search';
-import BootstrapTooltip from '../materialUI/BootstrapTooltip';
+import { Search, ArrowLeft, Loader2 } from "lucide-react";
 import MyAvatar from './MyAvatar';
-import GradientCircularProgress from '../materialUI/GradientCircularProgress';
+import { Input } from "@/components/ui/input"
+import { Button } from "@/components/ui/button"
+import { ScrollArea } from "@/components/ui/scroll-area"
+import {
+    Tooltip,
+    TooltipContent,
+    TooltipProvider,
+    TooltipTrigger,
+} from "@/components/ui/tooltip"
+import { useToast } from "@/hooks/use-toast"
 
 const SearchBar = () => {
     const { currentUser } = useContext(AuthContext);
@@ -18,48 +25,33 @@ const SearchBar = () => {
     const [errMsg, setErrMsg] = useState('Search for users by name or email');
     const [isFocus, setIsFocus] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
+    const { toast } = useToast();
 
     const handleSearch = async (searchTerm) => {
-        const results = new Map(); // Using Map to deduplicate results
+        const results = new Map();
         const lowerSearchTerm = searchTerm.toLowerCase();
         
         try {
-            // Search in users collection
-            const userNameQuery = query(collection(db, 'users'), 
-                where('searchNames', 'array-contains', lowerSearchTerm)
-            );
-            const userEmailQuery = query(collection(db, 'users'),
-                where('email', '==', searchTerm)
-            );
-            
-            // Execute both queries for users
             const [userNameSnapshot, userEmailSnapshot] = await Promise.all([
-                getDocs(userNameQuery),
-                getDocs(userEmailQuery)
+                getDocs(query(
+                    collection(db, 'users'),
+                    where('searchNames', 'array-contains', lowerSearchTerm)
+                )),
+                getDocs(query(
+                    collection(db, 'users'),
+                    where('email', '==', searchTerm)
+                ))
             ]);
 
-            // Add results from display name search
-            userNameSnapshot.forEach((doc) => {
-                const userData = doc.data();
-                results.set(userData.uid, userData);
-            });
+            userNameSnapshot.forEach((doc) => results.set(doc.data().uid, doc.data()));
+            userEmailSnapshot.forEach((doc) => results.set(doc.data().uid, doc.data()));
 
-            // Add results from email search
-            userEmailSnapshot.forEach((doc) => {
-                const userData = doc.data();
-                results.set(userData.uid, userData);
-            });
-
-            // Search in guests collection (only by display name)
-            const guestQuery = query(collection(db, 'guests'), 
+            const guestSnapshot = await getDocs(query(
+                collection(db, 'guests'),
                 where('searchNames', 'array-contains', lowerSearchTerm)
-            );
-            const guestSnapshot = await getDocs(guestQuery);
+            ));
             
-            guestSnapshot.forEach((doc) => {
-                const guestData = doc.data();
-                results.set(guestData.uid, guestData);
-            });
+            guestSnapshot.forEach((doc) => results.set(doc.data().uid, doc.data()));
 
             return Array.from(results.values());
         } catch (error) {
@@ -71,7 +63,7 @@ const SearchBar = () => {
     const handleSubmit = async () => {
         const searchTerm = searchText.trim();
         
-        if (searchTerm.length === 0) {
+        if (!searchTerm) {
             setSearchResults([]);
             setIsErr(true);
             setErrMsg("Please enter a name or email to search");
@@ -100,138 +92,180 @@ const SearchBar = () => {
             }
         } catch (error) {
             console.error("Search error:", error);
-            setIsErr(true);
-            setErrMsg("An error occurred while searching");
+            toast({
+                title: "Error",
+                description: "An error occurred while searching",
+                variant: "destructive",
+            });
         } finally {
             setIsLoading(false);
         }
     };
 
     const handleResultClick = async (index) => {
-        const clickedResult = searchResults[index];
-        const theirUID = clickedResult.uid;
-        const myUID = currentUser.uid;
-        const chatID = (myUID < theirUID) ? (myUID + "-" + theirUID) : (theirUID + "-" + myUID);
-        const myCategory = (currentUser.isAnonymous) ? 'guests' : 'users';
-        const theirCategory = ('isAnonymous' in clickedResult) ? 'guests' : 'users';
-        const myList = (theirCategory === 'users') ? 'chatList' : 'guestList';
-        const theirList = (myCategory === 'users') ? 'chatList' : 'guestList';
-        await updateDoc(doc(db, myCategory, myUID), {
-            [myList]: arrayUnion(theirUID)
-        });
-        await updateDoc(doc(db, theirCategory, theirUID), {
-            [theirList]: arrayUnion(myUID)
-        });
-        if(myCategory === 'guests' || theirCategory === 'guests') {
-            await setDoc(doc(db, "guestChats", chatID), {});
-        } else {
-            await setDoc(doc(db, "chats", chatID), {});
+        try {
+            const clickedResult = searchResults[index];
+            const theirUID = clickedResult.uid;
+            const myUID = currentUser.uid;
+            const chatID = myUID < theirUID ? myUID + "-" + theirUID : theirUID + "-" + myUID;
+            const myCategory = currentUser.isAnonymous ? 'guests' : 'users';
+            const theirCategory = 'isAnonymous' in clickedResult ? 'guests' : 'users';
+            const myList = theirCategory === 'users' ? 'chatList' : 'guestList';
+            const theirList = myCategory === 'users' ? 'chatList' : 'guestList';
+
+            await updateDoc(doc(db, myCategory, myUID), {
+                [myList]: arrayUnion(theirUID)
+            });
+
+            await updateDoc(doc(db, theirCategory, theirUID), {
+                [theirList]: arrayUnion(myUID)
+            });
+
+            await setDoc(
+                doc(db, myCategory === 'guests' || theirCategory === 'guests' ? "guestChats" : "chats", chatID),
+                {}
+            );
+
+            setOtherUser(searchResults[index]);
+            setSearchText("");
+            setSearchResults([]);
+            setIsFocus(false);
+            setIsErr(false);
+        } catch (error) {
+            toast({
+                title: "Error",
+                description: "Failed to start chat. Please try again.",
+                variant: "destructive",
+            });
         }
-        setOtherUser(searchResults[index]);
-        setSearchText("");
-        setSearchResults([]);
-        setIsFocus(false);
-        setIsErr(false);
     };
 
     return (
-        <div className="flex flex-col bg-gradient-to-br from-gray-700 to-gray-950 overflow-hidden">
-            <div className='flex w-full bg-[#2b2a33]'>
-                {(!isFocus) ?
-                    <BootstrapTooltip title="search">
-                        <button 
-                            onClick={() => { 
-                                setIsFocus(true);
-                                setIsErr(true);
-                                setErrMsg("Search for users by name or email");
-                            }} 
-                            className='px-3 hover:bg-gray-700 transition-colors'
-                        >
-                            <SearchIcon />
-                        </button>
-                    </BootstrapTooltip>
-                    :
-                    <BootstrapTooltip title="back">
-                        <button 
-                            onClick={() => { 
-                                setIsFocus(false); 
-                                setIsErr(false); 
-                                setSearchText(''); 
-                                setSearchResults([]); 
-                            }} 
-                            className='px-3 hover:bg-gray-700 transition-colors'
-                        >
-                            <ArrowBackIcon />
-                        </button>
-                    </BootstrapTooltip>
-                }
-                <input
+        <div className="flex flex-col bg-muted">
+            <div className="flex items-center border-b p-2">
+                <TooltipProvider>
+                    {!isFocus ? (
+                        <Tooltip>
+                            <TooltipTrigger asChild>
+                                <Button
+                                    variant="ghost"
+                                    size="icon"
+                                    onClick={() => {
+                                        setIsFocus(true);
+                                        setIsErr(true);
+                                        setErrMsg("Search for users by name or email");
+                                    }}
+                                >
+                                    <Search className="h-5 w-5" />
+                                </Button>
+                            </TooltipTrigger>
+                            <TooltipContent>Search</TooltipContent>
+                        </Tooltip>
+                    ) : (
+                        <Tooltip>
+                            <TooltipTrigger asChild>
+                                <Button
+                                    variant="ghost"
+                                    size="icon"
+                                    onClick={() => {
+                                        setIsFocus(false);
+                                        setIsErr(false);
+                                        setSearchText('');
+                                        setSearchResults([]);
+                                    }}
+                                >
+                                    <ArrowLeft className="h-5 w-5" />
+                                </Button>
+                            </TooltipTrigger>
+                            <TooltipContent>Back</TooltipContent>
+                        </Tooltip>
+                    )}
+                </TooltipProvider>
+
+                <Input
                     type="text"
-                    className="px-4 py-3 focus:outline-none grow bg-transparent text-white placeholder-gray-400"
-                    style={{ minWidth: '0' }}
+                    className="flex-1 border-0 bg-transparent"
                     placeholder={isFocus ? "Search by name or email" : "Search..."}
+                    value={searchText}
                     onChange={(e) => {
                         setSearchText(e.target.value);
-                        if (e.target.value.trim() === '') {
+                        if (!e.target.value.trim()) {
                             setSearchResults([]);
                             setIsErr(true);
                             setErrMsg("Search for users by name or email");
                         }
                     }}
-                    onFocus={() => { 
-                        if (!isFocus) { 
+                    onFocus={() => {
+                        if (!isFocus) {
                             setIsFocus(true);
                             setIsErr(true);
                             setErrMsg("Search for users by name or email");
-                        } 
+                        }
                     }}
                     onKeyDown={(e) => {
                         if (e.key === 'Enter' && !isLoading) {
                             handleSubmit();
                         }
                     }}
-                    value={searchText}
                 />
+
                 {isFocus && (
-                    <BootstrapTooltip title="search">
-                        <button
-                            onClick={() => !isLoading && handleSubmit()}
-                            className='px-3 hover:bg-gray-700 transition-colors disabled:opacity-50'
-                            disabled={isLoading}
-                        >
-                            <SearchIcon />
-                        </button>
-                    </BootstrapTooltip>
+                    <TooltipProvider>
+                        <Tooltip>
+                            <TooltipTrigger asChild>
+                                <Button
+                                    variant="ghost"
+                                    size="icon"
+                                    onClick={() => !isLoading && handleSubmit()}
+                                    disabled={isLoading}
+                                >
+                                    {isLoading ? (
+                                        <Loader2 className="h-5 w-5 animate-spin" />
+                                    ) : (
+                                        <Search className="h-5 w-5" />
+                                    )}
+                                </Button>
+                            </TooltipTrigger>
+                            <TooltipContent>Search</TooltipContent>
+                        </Tooltip>
+                    </TooltipProvider>
                 )}
             </div>
+
             {isFocus && (
-                <div className="search-results-container bg-inherit">
-                    <div className="h-[300px] overflow-y-auto">
-                        {isLoading ? (
-                            <div className='w-full h-full flex items-center justify-center'>
-                                <GradientCircularProgress />
-                            </div>
-                        ) : isErr ? (
-                            <div className='p-4 text-center text-gray-400'>{errMsg}</div>
-                        ) : searchResults.length === 0 ? (
-                            <div className='p-4 text-center text-gray-400'>No results found</div>
-                        ) : (
-                            searchResults.map((result, i) => (
-                                <div 
-                                    key={i} 
-                                    onClick={() => handleResultClick(i)} 
-                                    className="resultItem flex flex-row p-3 gap-x-3 border-b border-gray-700 hover:bg-gray-800 transition-colors cursor-pointer"
-                                >
-                                    <MyAvatar src={result.photoURL} width={'40px'} height={'40px'} />
-                                    <div className="info flex flex-col items-start justify-center">
-                                        <span className="font-bold text-lg text-left text-white">{result.displayName}</span>
-                                        <p className="text-xs text-left text-gray-300">{result.email}</p>
-                                    </div>
+                <ScrollArea className="h-[300px]">
+                    {isLoading ? (
+                        <div className="flex h-full items-center justify-center">
+                            <Loader2 className="h-8 w-8 animate-spin text-primary" />
+                        </div>
+                    ) : isErr ? (
+                        <div className="p-4 text-center text-muted-foreground">{errMsg}</div>
+                    ) : searchResults.length === 0 ? (
+                        <div className="p-4 text-center text-muted-foreground">No results found</div>
+                    ) : (
+                        searchResults.map((result, i) => (
+                            <div
+                                key={i}
+                                onClick={() => handleResultClick(i)}
+                                className="flex cursor-pointer items-center gap-3 border-b p-4 transition-colors hover:bg-accent"
+                            >
+                                <MyAvatar
+                                    src={result.photoURL}
+                                    width="40px"
+                                    height="40px"
+                                />
+                                <div className="flex flex-col">
+                                    <span className="font-medium">
+                                        {result.displayName}
+                                    </span>
+                                    <span className="text-xs text-muted-foreground">
+                                        {result.email}
+                                    </span>
                                 </div>
-                            ))
-                        )}
-                    </div>
-                </div>
+                            </div>
+                        ))
+                    )}
+                </ScrollArea>
             )}
         </div>
     );

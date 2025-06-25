@@ -4,16 +4,18 @@ import { createUserWithEmailAndPassword, updateProfile, sendEmailVerification } 
 import { ref, uploadBytesResumable, getDownloadURL } from "firebase/storage";
 import { doc, setDoc } from "firebase/firestore";
 import { Link, useNavigate } from 'react-router-dom';
-import AddPhotoAlternateIcon from '@mui/icons-material/AddPhotoAlternate';
-import GradientCircularProgress from '../materialUI/GradientCircularProgress.jsx';
+import { ImagePlus } from "lucide-react";
 import GuestLogIn from '../components/GuestLogIn.jsx';
+import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card"
+import { Input } from "@/components/ui/input"
+import { Button } from "@/components/ui/button"
+import { useToast } from "@/hooks/use-toast"
+import { Label } from "@/components/ui/label"
 
 const Signup = () => {
-
-    const [isErr, setIsErr] = useState(false);
-    const [error, setError] = useState("");
     const [isLoading, setIsLoading] = useState(false);
     const navigate = useNavigate();
+    const { toast } = useToast();
 
     function getAllSubstrings(str) {
         const lowerCaseStr = str.toLowerCase();
@@ -27,127 +29,136 @@ const Signup = () => {
     }
 
     const handleSubmit = async (e) => {
-        setIsLoading(true);
         e.preventDefault();
+        setIsLoading(true);
+        
         const displayName = e.target[0].value.trim();
         const email = e.target[1].value.trim();
         const password = e.target[2].value.trim();
         const photo = e.target[3].files[0];
 
-        createUserWithEmailAndPassword(auth, email, password)
-            .then(async (userCredential) => {
-                setIsErr(false);
-                const user = userCredential.user;
-                console.log(user);
-                const searchNames = getAllSubstrings(displayName);
-                if (photo) {
-                    const storageRef = ref(storage, 'profilePics/' + user.uid + '.jpg');
-                    const uploadTask = uploadBytesResumable(storageRef, photo);
-                    uploadTask.on(
-                        (error) => {
-                            setIsErr(true);
-                            const errorMessage = error.message;
-                            console.log(errorMessage);
-                            setError(errorMessage);
-                        },
-                        () => {
-                            getDownloadURL(uploadTask.snapshot.ref).then(async (downloadURL) => {
-                                await updateProfile(user, {
-                                    displayName,
-                                    photoURL: downloadURL,
-                                }).catch((error) => {
-                                    setIsErr(true);
-                                    const errorMessage = error.message;
-                                    console.log(errorMessage);
-                                    setError(errorMessage);
-                                });
-                                await setDoc(doc(db, "users", user.uid), {
-                                    uid: user.uid,
-                                    displayName,
-                                    email,
-                                    photoURL: downloadURL,
-                                    searchNames,
-                                })
-                                    .then(() => {
-                                        sendEmailVerification(auth.currentUser)
-                                            .then(() => {
-                                                alert("Email verification link sent, verify your email before logging in");
-                                                navigate("/login");
-                                            });
-                                    }).catch((error) => {
-                                        setIsErr(true);
-                                        const errorMessage = error.message;
-                                        console.log(errorMessage);
-                                        setError(errorMessage);
-                                    });
-                            });
-                        }
-                    );
-                }
-                else {
-                    await updateProfile(user, {
-                        displayName,
-                        photoURL: "https://firebasestorage.googleapis.com/v0/b/hotchat-nik.appspot.com/o/profilePics%2FDummy.png?alt=media&token=a39fc600-99f7-490d-a670-c23dc37e8d53",
-                    }).catch((error) => {
-                        setIsErr(true);
-                        const errorMessage = error.message;
-                        console.log(errorMessage);
-                        setError(errorMessage);
-                    });
-                    await setDoc(doc(db, "users", user.uid), {
-                        uid: user.uid,
-                        displayName,
-                        email,
-                        photoURL: "https://firebasestorage.googleapis.com/v0/b/hotchat-nik.appspot.com/o/profilePics%2FDummy.png?alt=media&token=a39fc600-99f7-490d-a670-c23dc37e8d53",
-                        searchNames,
-                    }).then(() => {
-                        sendEmailVerification(auth.currentUser).then(() => {
-                            alert("Email verification link sent, verify your email before logging in");
-                            navigate("/login");
-                        });
-                    }).catch((error) => {
-                        setIsErr(true);
-                        const errorMessage = error.message;
-                        console.log(errorMessage);
-                        setError(errorMessage);
-                    });
-                }
-                setIsLoading(false);
-            })
-            .catch((error) => {
-                setIsErr(true);
-                const errorMessage = error.message;
-                console.log(errorMessage);
-                setError(errorMessage);
-                setIsLoading(false);
+        try {
+            const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+            const user = userCredential.user;
+            const searchNames = getAllSubstrings(displayName);
+
+            let photoURL = "https://firebasestorage.googleapis.com/v0/b/hotchat-nik.appspot.com/o/profilePics%2FDummy.png?alt=media&token=a39fc600-99f7-490d-a670-c23dc37e8d53";
+
+            if (photo) {
+                const storageRef = ref(storage, 'profilePics/' + user.uid + '.jpg');
+                const uploadTask = uploadBytesResumable(storageRef, photo);
+                const snapshot = await uploadTask;
+                photoURL = await getDownloadURL(snapshot.ref);
+            }
+
+            await updateProfile(user, {
+                displayName,
+                photoURL,
             });
-    }
+
+            await setDoc(doc(db, "users", user.uid), {
+                uid: user.uid,
+                displayName,
+                email,
+                photoURL,
+                searchNames,
+            });
+
+            await sendEmailVerification(auth.currentUser, {
+                url: window.location.origin + "/login",
+                handleCodeInApp: false,
+            });
+            
+            toast({
+                title: "Account created",
+                description: "Please check your email (including spam folder) for the verification link. You must verify your email before logging in.",
+            });
+            
+            // Sign out the user after registration so they must verify email first
+            await auth.signOut();
+            navigate("/login");
+        } catch (error) {
+            toast({
+                title: "Error",
+                description: error.message,
+                variant: "destructive",
+            });
+        } finally {
+            setIsLoading(false);
+        }
+    };
 
     return (
-        <div className="container p-10 bg-gradient-to-br from-gray-700 to-gray-950 flex flex-col justify-center space-y-5 max-w-fit m-auto rounded-xl">
-            <h1 className="theName text-[2.4em] font-bold text-[#86C232]">theConnection</h1>
-            <h2 className='signupLogin text-[1.2em] text-[#61892F]'>Sign Up</h2>
-            <form onSubmit={handleSubmit} className="flex flex-col space-y-5">
-                <input className='p-2 border-b-2 border-b-[#86C232] focus:outline-none' type="text" name="displayName" id="displayName" placeholder='Enter name' />
-                <input className='p-2 border-b-2 border-b-[#86C232] focus:outline-none' type="email" name="email" id="email" placeholder='Enter email' />
-                <input className='p-2 border-b-2 border-b-[#86C232] focus:outline-none' type="password" name="password" id="password" placeholder='Set password' />
-                <label htmlFor="profilePhoto" className='flex gap-2 cursor-pointer'>
-                    <AddPhotoAlternateIcon className='text-[#86c232]'/>
-                    <span>Add a profile pic</span>
-                </label>
-                <input className="hidden" type="file" accept="image/*" name="profilePhoto" id="profilePhoto" />
-                <button className='min-w-[232px] rounded-md border border-transparent py-2 px-4 text-base font-semibold font-inherit bg-[#1a1a1a] cursor-pointer transition-border-color duration-250 overflow-hidden text-[#86C232] focus:outline-none focus-visible:ring-4 focus-visible:ring-auto focus-visible:ring-[#86C232] hover:border-[#6a9317]'>
-                    {isLoading ? <GradientCircularProgress /> : <>Sign Up</>}
-                </button>
-                {isErr && <span>{error}</span>}
-            </form>
-            <div className='flex items-center justify-center gap-2'>
-                <span className='flex-shrink-0 inline-block whitespace-no-wrap'>already have an account ?</span>
-                <Link className='flex-shrink-0 inline-block whitespace-no-wrap font-medium text-[#646cff] no-underline hover:text-[#535bf2]' to="/login">Log In</Link>
-            </div>
-            <GuestLogIn />
+        <div className="flex min-h-screen items-center justify-center p-4">
+            <Card className="auth-card shadow-lg">
+                <CardHeader>
+                    <CardTitle className="text-center">
+                        <h1 className="text-4xl font-bold text-primary">theConnection</h1>
+                        <h2 className="mt-2 text-2xl text-muted-foreground">Sign Up</h2>
+                    </CardTitle>
+                </CardHeader>
+                <CardContent>
+                    <form onSubmit={handleSubmit} className="space-y-4">
+                        <div className="space-y-2">
+                            <Label htmlFor="displayName">Name</Label>
+                            <Input
+                                id="displayName"
+                                type="text"
+                                placeholder="Enter name"
+                                required
+                            />
+                        </div>
+                        <div className="space-y-2">
+                            <Label htmlFor="email">Email</Label>
+                            <Input
+                                id="email"
+                                type="email"
+                                placeholder="Enter email"
+                                required
+                            />
+                        </div>
+                        <div className="space-y-2">
+                            <Label htmlFor="password">Password</Label>
+                            <Input
+                                id="password"
+                                type="password"
+                                placeholder="Set password"
+                                required
+                            />
+                        </div>
+                        <div className="space-y-2">
+                            <Label htmlFor="profilePhoto" className="cursor-pointer inline-flex items-center gap-2 text-primary hover:text-primary/80">
+                                <ImagePlus className="h-5 w-5" />
+                                Add a profile pic
+                            </Label>
+                            <Input
+                                id="profilePhoto"
+                                type="file"
+                                accept="image/*"
+                                className="hidden"
+                            />
+                        </div>
+                        <Button
+                            type="submit"
+                            className="w-full"
+                            disabled={isLoading}
+                        >
+                            {isLoading ? "Creating account..." : "Sign Up"}
+                        </Button>
+                    </form>
+                    <div className="mt-4 text-center text-sm">
+                        <span>Already have an account? </span>
+                        <Link to="/login" className="font-medium text-primary hover:underline">
+                            Log In
+                        </Link>
+                    </div>
+                    <div className="mt-4">
+                        <GuestLogIn />
+                    </div>
+                </CardContent>
+            </Card>
         </div>
     );
-}
+};
 
 export default Signup;
