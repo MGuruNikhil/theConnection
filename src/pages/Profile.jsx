@@ -1,4 +1,5 @@
 import { useContext, useState } from "react";
+import CropperModal from "../components/CropperModal";
 import { AuthContext } from "../context/AuthContext";
 import { auth, storage, db } from "../firebase";
 import { deleteUser, reauthenticateWithCredential, signOut, updateProfile, EmailAuthProvider } from "firebase/auth";
@@ -7,10 +8,11 @@ import { doc, updateDoc, getDoc, arrayRemove, deleteDoc } from "firebase/firesto
 import EditDisplayName from "../components/EditDisplayName";
 import { useNavigate } from "react-router-dom";
 import MyAvatar from "../components/MyAvatar";
-import { ArrowLeft, Edit, X, UserX, LogOut, Lock, Loader2 } from "lucide-react";
+import { ArrowLeft, Edit, X, UserX, LogOut, Lock, Loader2, MoreVertical, Trash2, ImagePlus } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import {
     Tooltip,
     TooltipContent,
@@ -30,6 +32,8 @@ import {
 } from "@/components/ui/alert-dialog";
 import { useToast } from "@/hooks/use-toast";
 
+const DEFAULT_PHOTO_URL = "https://firebasestorage.googleapis.com/v0/b/hotchat-nik.appspot.com/o/profilePics%2FDummy.png?alt=media&token=a39fc600-99f7-490d-a670-c23dc37e8d53";
+
 const Profile = () => {
     const { currentUser } = useContext(AuthContext);
     const myCategory = currentUser.isAnonymous ? 'guests' : 'users';
@@ -41,81 +45,117 @@ const Profile = () => {
 
     const [isUpdatingPP, setIsUpdatingPP] = useState(false);
     const [uploadProgress, setUploadProgress] = useState(0);
+    const [popoverOpen, setPopoverOpen] = useState(false);
+    const [showCropper, setShowCropper] = useState(false);
+    const [selectedImage, setSelectedImage] = useState(null); // base64 or url
+    const [croppedBlob, setCroppedBlob] = useState(null);
 
-    const handleEditPP = async (e) => {
-        const photo = e.target.files[0];
-        if (photo) {
-            try {
-                setIsUpdatingPP(true);
-                setShowButton(false);
-                toast({
-                    title: "Uploading",
-                    description: "Your profile picture is being updated...",
-                });
+    // Handle file input change to show cropper
+    const handleEditPP = (e) => {
+        setPopoverOpen(false);
+        const file = e.target.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = (ev) => {
+                setSelectedImage(ev.target.result);
+                setShowCropper(true);
+            };
+            reader.readAsDataURL(file);
+        }
+    };
 
-                const storageRef = ref(storage, 'profilePics/' + currentUser.uid + '.jpg');
-                const uploadTask = uploadBytesResumable(storageRef, photo);
+    // When cropping is done
+    const handleCropComplete = async (blob) => {
+        setShowCropper(false);
+        setIsUpdatingPP(true);
+        setShowButton(false);
+        try {
+            toast({
+                title: "Uploading",
+                description: "Your profile picture is being updated...",
+            });
 
-                uploadTask.on(
-                    'state_changed',
-                    (snapshot) => {
-                        const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
-                        setUploadProgress(progress);
-                    },
-                    (error) => {
+            const storageRef = ref(storage, 'profilePics/' + currentUser.uid + '.jpg');
+
+            // Only delete the old profile picture if it's not the default
+            if (currentUser.photoURL && currentUser.photoURL !== DEFAULT_PHOTO_URL) {
+                try {
+                    await getDownloadURL(storageRef);
+                    await deleteObject(storageRef);
+                } catch (error) {
+                    // Ignore if not found
+                    if (error.code !== "storage/object-not-found") {
+                        throw error;
+                    }
+                }
+            }
+
+            const uploadTask = uploadBytesResumable(storageRef, blob);
+
+            uploadTask.on(
+                'state_changed',
+                (snapshot) => {
+                    const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+                    setUploadProgress(progress);
+                },
+                (error) => {
+                    toast({
+                        title: "Error",
+                        description: error.message,
+                        variant: "destructive",
+                    });
+                    setIsUpdatingPP(false);
+                },
+                async () => {
+                    try {
+                        const downloadURL = await getDownloadURL(uploadTask.snapshot.ref);
+                        await Promise.all([
+                            updateProfile(currentUser, {
+                                photoURL: downloadURL,
+                            }),
+                            updateDoc(doc(db, myCategory, currentUser.uid), {
+                                photoURL: downloadURL,
+                            })
+                        ]);
+
+                        // Force refresh the auth state to update UI
+                        await auth.currentUser.reload();
+
+                        toast({
+                            title: "Success",
+                            description: "Profile picture updated successfully",
+                        });
+
+                        // Force re-render by updating state
+                        setIsUpdatingPP(false);
+                        setUploadProgress(0);
+                    } catch (error) {
                         toast({
                             title: "Error",
                             description: error.message,
                             variant: "destructive",
                         });
                         setIsUpdatingPP(false);
-                    },
-                    async () => {
-                        try {
-                            const downloadURL = await getDownloadURL(uploadTask.snapshot.ref);
-                            
-                            await Promise.all([
-                                updateProfile(currentUser, {
-                                    photoURL: downloadURL,
-                                }),
-                                updateDoc(doc(db, myCategory, currentUser.uid), {
-                                    photoURL: downloadURL,
-                                })
-                            ]);
-
-                            // Force refresh the auth state to update UI
-                            await auth.currentUser.reload();
-                            
-                            toast({
-                                title: "Success",
-                                description: "Profile picture updated successfully",
-                            });
-                            
-                            // Force re-render by updating state
-                            setIsUpdatingPP(false);
-                            setUploadProgress(0);
-                        } catch (error) {
-                            toast({
-                                title: "Error",
-                                description: error.message,
-                                variant: "destructive",
-                            });
-                            setIsUpdatingPP(false);
-                        }
                     }
-                );
-            } catch (error) {
-                toast({
-                    title: "Error",
-                    description: error.message,
-                    variant: "destructive",
-                });
-                setIsUpdatingPP(false);
-            }
+                }
+            );
+        } catch (error) {
+            toast({
+                title: "Error",
+                description: error.message,
+                variant: "destructive",
+            });
+            setIsUpdatingPP(false);
         }
     };
 
+    const handleCropCancel = () => {
+        setShowCropper(false);
+        setSelectedImage(null);
+    };
+
     const handleRemovePP = async () => {
+        setPopoverOpen(false);
         try {
             const fileRef = ref(storage, 'profilePics/' + currentUser.uid + '.jpg');
             try {
@@ -262,52 +302,35 @@ const Profile = () => {
         }
     };
 
-    const handleDelAcc = async () => {
-        if (currentUser.isAnonymous) {
-            await deleteAcc();
-        } else {
-            try {
-                const credential = promptForCredentials();
-                await reauthenticateWithCredential(currentUser, credential);
-                await deleteAcc();
-            } catch (error) {
-                toast({
-                    title: "Error",
-                    description: error.message,
-                    variant: "destructive",
-                });
-            }
-        }
-    };
-
     return (
-        <div className="mx-auto flex min-h-screen w-full items-center justify-center px-4 py-8">
-            <Card className="relative w-full max-w-4xl shadow-lg">
-                <TooltipProvider>
-                    <Tooltip>
-                        <TooltipTrigger asChild>
-                            <Button
-                                variant="outline"
-                                size="icon"
-                                className="absolute left-4 top-4"
-                                onClick={() => navigate("/")}
-                            >
-                                <ArrowLeft className="h-4 w-4" />
-                            </Button>
-                        </TooltipTrigger>
-                        <TooltipContent>Back</TooltipContent>
-                    </Tooltip>
-                </TooltipProvider>
+        <div className="flex min-h-screen items-center justify-center p-4">
+            <Card className="auth-card shadow-lg relative">
+                <div className="flex w-full justify-start p-4">
+                    <TooltipProvider>
+                        <Tooltip>
+                            <TooltipTrigger asChild>
+                                <Button
+                                    variant="outline"
+                                    size="icon"
+                                    onClick={() => navigate("/")}
+                                >
+                                    <ArrowLeft className="h-4 w-4" />
+                                </Button>
+                            </TooltipTrigger>
+                            <TooltipContent>Back</TooltipContent>
+                        </Tooltip>
+                    </TooltipProvider>
+                </div>
 
-                <CardContent className="mt-8 space-y-8 p-10">
-                    <div className="relative mx-auto w-fit">
+                <CardContent className="mt-4 space-y-8 p-10">
+                    <div className="relative w-full flex flex-col items-center">
                         <div className="relative">
                             <MyAvatar
                                 width="200px"
                                 height="200px"
                                 src={currentUser.photoURL}
                                 className={cn(
-                                    "rounded-full border-4 border-primary",
+                                    "rounded-full",
                                     isUpdatingPP && "opacity-50"
                                 )}
                             />
@@ -318,57 +341,66 @@ const Profile = () => {
                                     </div>
                                 </div>
                             )}
-                        </div>
-
-                        <div
-                            className="absolute bottom-2 right-2 z-10 flex gap-2 rounded-full"
-                            onMouseEnter={() => setShowButton(true)}
-                            onMouseLeave={() => setShowButton(false)}
-                        >
-                            {showButton && (
-                                <TooltipProvider>
-                                    <Tooltip>
-                                        <TooltipTrigger asChild>
-                                            <Button
-                                                variant="destructive"
-                                                size="icon"
-                                                onClick={handleRemovePP}
-                                            >
-                                                <X className="h-4 w-4" />
-                                            </Button>
-                                        </TooltipTrigger>
-                                        <TooltipContent>Remove picture</TooltipContent>
-                                    </Tooltip>
-                                </TooltipProvider>
+                            {/* Floating menu button - now top right of avatar */}
+                            <Popover open={popoverOpen} onOpenChange={setPopoverOpen}>
+                                <PopoverTrigger asChild>
+                                    <Button
+                                        variant="secondary"
+                                        size="icon"
+                                        className="absolute top-2 right-2 z-10 shadow-lg"
+                                        aria-label="Profile picture options"
+                                    >
+                                        <MoreVertical className="h-5 w-5" />
+                                    </Button>
+                                </PopoverTrigger>
+                                <PopoverContent align="end" className="w-40 p-2">
+                                    <label htmlFor="ppUpload" className="flex items-center gap-2 px-2 py-2 rounded hover:bg-accent cursor-pointer">
+                                        <ImagePlus className="h-4 w-4 text-primary" />
+                                        <span className="text-sm">Change picture</span>
+                                        <input
+                                            className="hidden"
+                                            type="file"
+                                            accept="image/*"
+                                            id="ppUpload"
+                                            onChange={handleEditPP}
+                                        />
+                                    </label>
+                                <AlertDialog>
+                                    <AlertDialogTrigger asChild>
+                                        <button
+                                            type="button"
+                                            className="flex flex-nowrap items-center gap-2 w-full px-2 py-2 rounded hover:bg-accent text-destructive whitespace-nowrap disabled:opacity-50 disabled:cursor-not-allowed"
+                                            disabled={currentUser.photoURL === DEFAULT_PHOTO_URL}
+                                        >
+                                            <Trash2 className="h-4 w-4" />
+                                            <span className="text-sm whitespace-nowrap">Remove picture</span>
+                                        </button>
+                                    </AlertDialogTrigger>
+                                    <AlertDialogContent>
+                                        <AlertDialogHeader>
+                                            <AlertDialogTitle>Remove profile picture?</AlertDialogTitle>
+                                            <AlertDialogDescription>
+                                                Are you sure you want to remove your profile picture? This action cannot be undone and your profile will revert to the default image.
+                                            </AlertDialogDescription>
+                                        </AlertDialogHeader>
+                                        <AlertDialogFooter>
+                                            <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                            <AlertDialogAction className="bg-destructive text-destructive-foreground hover:bg-destructive/90" onClick={handleRemovePP}>
+                                                Remove
+                                            </AlertDialogAction>
+                                        </AlertDialogFooter>
+                                    </AlertDialogContent>
+                                </AlertDialog>
+                                </PopoverContent>
+                            </Popover>
+                            {showCropper && selectedImage && (
+                                <CropperModal
+                                    image={selectedImage}
+                                    onCancel={handleCropCancel}
+                                    onCropComplete={handleCropComplete}
+                                />
                             )}
-                            <TooltipProvider>
-                                <Tooltip>
-                                    <TooltipTrigger asChild>
-                                        <label htmlFor="ppUpload">
-                                            <Button
-                                                variant="default"
-                                                size="icon"
-                                                className="cursor-pointer"
-                                                asChild
-                                            >
-                                                <div>
-                                                    <Edit className="h-4 w-4" />
-                                                </div>
-                                            </Button>
-                                        </label>
-                                    </TooltipTrigger>
-                                    <TooltipContent>Edit picture</TooltipContent>
-                                </Tooltip>
-                            </TooltipProvider>
                         </div>
-
-                        <input
-                            className="hidden"
-                            type="file"
-                            accept="image/*"
-                            id="ppUpload"
-                            onChange={handleEditPP}
-                        />
                     </div>
 
                     <EditDisplayName label="Display Name" fbkey="displayName" />
@@ -392,7 +424,7 @@ const Profile = () => {
                         </div>
                     </div>
 
-                    <div className="mt-6 flex flex-col gap-4">
+                    <div className="mt-6 flex flex-col md:flex-row gap-4">
                         <AlertDialog>
                             <AlertDialogTrigger asChild>
                                 <Button

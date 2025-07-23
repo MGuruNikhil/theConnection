@@ -21,14 +21,6 @@ const FullImg = () => {
                 <span style={{ display: 'none' }}></span>
             </DialogTrigger>
             <DialogContent className="max-w-[90vw] max-h-[90vh]" onClick={(e) => e.stopPropagation()}>
-                <Button
-                    variant="ghost"
-                    size="icon"
-                    className="absolute right-2 top-2"
-                    onClick={handleClose}
-                >
-                    <X className="h-4 w-4" />
-                </Button>
                 <img
                     src={imgUrl}
                     alt="Profile picture"

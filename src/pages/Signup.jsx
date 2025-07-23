@@ -1,4 +1,5 @@
 import React, { useState } from 'react'
+import CropperModal from '../components/CropperModal';
 import { auth, storage, db } from '../firebase.js'
 import { createUserWithEmailAndPassword, updateProfile, sendEmailVerification } from "firebase/auth";
 import { ref, uploadBytesResumable, getDownloadURL } from "firebase/storage";
@@ -14,6 +15,9 @@ import { Label } from "@/components/ui/label"
 
 const Signup = () => {
     const [isLoading, setIsLoading] = useState(false);
+    const [showCropper, setShowCropper] = useState(false);
+    const [selectedImage, setSelectedImage] = useState(null); // base64 or url
+    const [croppedBlob, setCroppedBlob] = useState(null);
     const navigate = useNavigate();
     const { toast } = useToast();
 
@@ -31,11 +35,12 @@ const Signup = () => {
     const handleSubmit = async (e) => {
         e.preventDefault();
         setIsLoading(true);
-        
+
         const displayName = e.target[0].value.trim();
         const email = e.target[1].value.trim();
         const password = e.target[2].value.trim();
-        const photo = e.target[3].files[0];
+        // Use croppedBlob if available, else file input
+        const photo = croppedBlob || (e.target[3].files[0] || null);
 
         try {
             const userCredential = await createUserWithEmailAndPassword(auth, email, password);
@@ -88,6 +93,30 @@ const Signup = () => {
         }
     };
 
+    // Handle file input change to show cropper
+    const handlePhotoChange = (e) => {
+        const file = e.target.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = (ev) => {
+                setSelectedImage(ev.target.result);
+                setShowCropper(true);
+            };
+            reader.readAsDataURL(file);
+        }
+    };
+
+    // When cropping is done
+    const handleCropComplete = (blob) => {
+        setCroppedBlob(blob);
+        setShowCropper(false);
+    };
+
+    const handleCropCancel = () => {
+        setShowCropper(false);
+        setSelectedImage(null);
+    };
+
     return (
         <div className="flex min-h-screen items-center justify-center p-4">
             <Card className="auth-card shadow-lg">
@@ -136,7 +165,11 @@ const Signup = () => {
                                 type="file"
                                 accept="image/*"
                                 className="hidden"
+                                onChange={handlePhotoChange}
                             />
+                            {croppedBlob && (
+                                <span className="text-xs text-green-600">Cropped image ready for upload</span>
+                            )}
                         </div>
                         <Button
                             type="submit"
@@ -157,6 +190,13 @@ const Signup = () => {
                     </div>
                 </CardContent>
             </Card>
+        {showCropper && selectedImage && (
+            <CropperModal
+                image={selectedImage}
+                onCancel={handleCropCancel}
+                onCropComplete={handleCropComplete}
+            />
+        )}
         </div>
     );
 };
