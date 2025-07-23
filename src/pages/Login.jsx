@@ -2,12 +2,15 @@ import React, { useState } from 'react'
 import { auth } from '../firebase.js'
 import { sendPasswordResetEmail, signInWithEmailAndPassword, signOut, sendEmailVerification } from "firebase/auth";
 import { Link, useNavigate } from 'react-router-dom';
+import { useTheme } from '../context/ThemeContext';
 import GuestLogIn from '../components/GuestLogIn.jsx';
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
 import { useToast } from "@/hooks/use-toast"
+import { Sun, Moon } from "lucide-react"
 
 const Login = () => {
     const navigate = useNavigate();

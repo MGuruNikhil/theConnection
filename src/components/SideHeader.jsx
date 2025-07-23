@@ -2,8 +2,9 @@ import React, { useContext } from 'react';
 import { auth, db, storage } from '../firebase';
 import { deleteUser, signOut } from 'firebase/auth';
 import { AuthContext } from '../context/AuthContext';
+import { useTheme } from '../context/ThemeContext';
 import { useNavigate } from 'react-router-dom';
-import { User, LogOut } from "lucide-react";
+import { User, LogOut, Sun, Moon } from "lucide-react";
 import MyAvatar from './MyAvatar';
 import { deleteObject, getDownloadURL, ref } from 'firebase/storage';
 import { arrayRemove, deleteDoc, doc, getDoc, updateDoc } from 'firebase/firestore';
@@ -29,6 +30,7 @@ import { useToast } from "@/hooks/use-toast"
 
 const SideHeader = () => {
     const { currentUser } = useContext(AuthContext);
+    const { theme, toggleTheme } = useTheme();
     const displayName = currentUser.displayName;
     const photoURL = currentUser.photoURL;
     const navigate = useNavigate();
@@ -136,6 +138,27 @@ const SideHeader = () => {
             </div>
 
             <div className="flex items-center gap-2">
+                <TooltipProvider>
+                    <Tooltip>
+                        <TooltipTrigger asChild>
+                            <Button
+                                variant="ghost"
+                                size="icon"
+                                onClick={toggleTheme}
+                            >
+                                {theme === 'light' ? (
+                                    <Moon className="h-5 w-5" />
+                                ) : (
+                                    <Sun className="h-5 w-5" />
+                                )}
+                            </Button>
+                        </TooltipTrigger>
+                        <TooltipContent>
+                            {theme === 'light' ? 'Dark mode' : 'Light mode'}
+                        </TooltipContent>
+                    </Tooltip>
+                </TooltipProvider>
+
                 <TooltipProvider>
                     <Tooltip>
                         <TooltipTrigger asChild>
