@@ -20,7 +20,7 @@ const FullImg = () => {
             <DialogTrigger asChild>
                 <span style={{ display: 'none' }}></span>
             </DialogTrigger>
-            <DialogContent className="max-w-[90vw] max-h-[90vh]" onClick={(e) => e.stopPropagation()}>
+            <DialogContent className="max-w-xl max-h-[90vh] w-full" onClick={(e) => e.stopPropagation()}>
                 <img
                     src={imgUrl}
                     alt="Profile picture"

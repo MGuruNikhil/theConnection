@@ -13,7 +13,7 @@ const Messages = () => {
         ? currentUser.uid + "-" + otherUser?.uid 
         : otherUser?.uid + "-" + currentUser.uid;
     const [chats, setChats] = useState([]);
-    const scrollRef = useRef(null);
+    const containerRef = useRef(null);
 
     useEffect(() => {
         const renderMessages = () => {
@@ -33,37 +33,45 @@ const Messages = () => {
         otherUser?.uid && renderMessages();
     }, [otherUser?.uid, currentUser.uid, ChatID]);
 
+
     useEffect(() => {
-        if (scrollRef.current) {
-            scrollRef.current.scrollTo({ top: scrollRef.current.scrollHeight, behavior: 'smooth' });
+        if (containerRef.current) {
+            const scrollable = containerRef.current.querySelector('[data-radix-scroll-area-viewport]');
+            if (scrollable) {
+                requestAnimationFrame(() => {
+                    scrollable.scrollTo({ top: scrollable.scrollHeight, behavior: 'smooth' });
+                });
+            }
         }
-    }, [chats]);
+    }, [chats, otherUser?.uid]);
 
     return (
-        <ScrollArea ref={scrollRef} className="flex-1 bg-muted/30">
-            <div className="flex flex-col gap-2 p-4">
-                {chats?.map((chat, index) => (
-                    <div
-                        key={chat.id || index}
-                        className={cn(
-                            "flex w-full",
-                            chat.from === currentUser.uid ? "justify-end" : "justify-start"
-                        )}
-                    >
+        <div ref={containerRef} className="h-full flex-1 min-h-0">
+            <ScrollArea className="h-full flex-1 min-h-0 bg-muted/30">
+                <div className="flex flex-col gap-2 p-4">
+                    {chats?.map((chat, index) => (
                         <div
+                            key={chat.id || index}
                             className={cn(
-                                "max-w-[85%] rounded-xl px-4 py-2 text-sm",
-                                chat.from === currentUser.uid
-                                    ? "bg-primary text-primary-foreground"
-                                    : "bg-muted text-muted-foreground"
+                                "flex w-full",
+                                chat.from === currentUser.uid ? "justify-end" : "justify-start"
                             )}
                         >
-                            {chat.message}
+                            <div
+                                className={cn(
+                                    "max-w-[85%] rounded-xl px-4 py-2 text-sm",
+                                    chat.from === currentUser.uid
+                                        ? "bg-primary text-primary-foreground"
+                                        : "bg-muted text-muted-foreground"
+                                )}
+                            >
+                                {chat.message}
+                            </div>
                         </div>
-                    </div>
-                ))}
-            </div>
-        </ScrollArea>
+                    ))}
+                </div>
+            </ScrollArea>
+        </div>
     );
 }
 
