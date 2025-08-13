@@ -20,8 +20,8 @@ const Chat = () => {
 
     if (matches) {
         return (
-            <div className="flex min-h-screen items-center justify-center p-4">
-                <div className="flex h-[80vh] w-full overflow-hidden rounded-lg border bg-background shadow-lg sm:w-full md:w-[768px] lg:w-[1024px] xl:w-[1280px]">
+            <div className="fixed inset-0 bg-background">
+                <div className="flex h-full w-full overflow-hidden bg-background">
                     <Sidebar 
                         chatList={chatList} 
                         setChatList={setChatList}
