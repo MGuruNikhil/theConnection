@@ -141,6 +141,61 @@ a:hover {
     }
 }
 
+/* Profile page specific styles */
+.profile-container {
+    height: 100vh;
+    width: 100%;
+    background-color: hsl(var(--background));
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+@media (min-width: 768px) {
+    .profile-container {
+        min-height: 100vh;
+        height: auto;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 1rem;
+        overflow: auto;
+    }
+}
+
+.profile-header {
+    position: absolute;
+    top: 0;
+    left: 0;
+    z-index: 10;
+    padding: 0.75rem;
+}
+
+.profile-content {
+    flex: 1;
+    padding: 4rem 1rem 1rem 1rem;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+@media (min-width: 768px) {
+    .profile-content {
+        flex: none;
+        padding: 2.5rem;
+        overflow: visible;
+        width: 100%;
+        min-width: min(400px, calc(100vw - 2rem));
+        max-width: 480px;
+        background-color: hsl(var(--card));
+        border: 1px solid hsl(var(--border));
+        border-radius: 0.5rem;
+        box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+        position: relative;
+    }
+}
+
 @media screen and (max-width: 768px) {
     .Sidebar, .ChatArea {
         width: 100%;

@@ -47,7 +47,7 @@ const Profile = () => {
     const [uploadProgress, setUploadProgress] = useState(0);
     const [popoverOpen, setPopoverOpen] = useState(false);
     const [showCropper, setShowCropper] = useState(false);
-    const [selectedImage, setSelectedImage] = useState(null); // base64 or url
+    const [selectedImage, setSelectedImage] = useState(null);
     const [croppedBlob, setCroppedBlob] = useState(null);
 
     // Handle file input change to show cropper
@@ -303,9 +303,28 @@ const Profile = () => {
     };
 
     return (
-        <div className="flex min-h-screen items-center justify-center p-4">
-            <Card className="auth-card shadow-lg relative">
-                <div className="flex w-full justify-start p-4">
+        <div className="profile-container">
+            {/* Mobile back button - positioned absolute to screen */}
+            <div className="profile-header md:hidden">
+                <TooltipProvider>
+                    <Tooltip>
+                        <TooltipTrigger asChild>
+                            <Button
+                                variant="outline"
+                                size="icon"
+                                onClick={() => navigate("/")}
+                            >
+                                <ArrowLeft className="h-4 w-4" />
+                            </Button>
+                        </TooltipTrigger>
+                        <TooltipContent>Back</TooltipContent>
+                    </Tooltip>
+                </TooltipProvider>
+            </div>
+
+            <div className="profile-content space-y-6 md:space-y-8">
+                {/* Desktop back button - positioned relative to profile card */}
+                <div className="hidden md:block absolute top-4 left-4 z-10">
                     <TooltipProvider>
                         <Tooltip>
                             <TooltipTrigger asChild>
@@ -321,116 +340,147 @@ const Profile = () => {
                         </Tooltip>
                     </TooltipProvider>
                 </div>
-
-                <CardContent className="mt-4 space-y-8 p-10">
-                    <div className="relative w-full flex flex-col items-center">
-                        <div className="relative">
-                            <MyAvatar
-                                width="200px"
-                                height="200px"
-                                src={currentUser.photoURL}
-                                className={cn(
-                                    "rounded-full",
-                                    isUpdatingPP && "opacity-50"
-                                )}
-                            />
-                            {isUpdatingPP && (
-                                <div className="absolute inset-0 flex items-center justify-center">
-                                    <div className="text-primary text-sm font-medium">
-                                        {Math.round(uploadProgress)}%
-                                    </div>
+                <div className="relative w-full flex flex-col items-center">
+                    <div className="relative">
+                        <MyAvatar
+                            width="150px md:200px"
+                            height="150px md:200px"
+                            src={currentUser.photoURL}
+                            className={cn(
+                                "rounded-full w-[150px] h-[150px] md:w-[200px] md:h-[200px]",
+                                isUpdatingPP && "opacity-50"
+                            )}
+                        />
+                        {isUpdatingPP && (
+                            <div className="absolute inset-0 flex items-center justify-center">
+                                <div className="text-primary text-sm font-medium">
+                                    {Math.round(uploadProgress)}%
                                 </div>
-                            )}
-                            {/* Floating menu button - now top right of avatar */}
-                            <Popover open={popoverOpen} onOpenChange={setPopoverOpen}>
-                                <PopoverTrigger asChild>
-                                    <Button
-                                        variant="secondary"
-                                        size="icon"
-                                        className="absolute top-2 right-2 z-10 shadow-lg"
-                                        aria-label="Profile picture options"
-                                    >
-                                        <MoreVertical className="h-5 w-5" />
-                                    </Button>
-                                </PopoverTrigger>
-                                <PopoverContent align="end" className="w-40 p-2">
-                                    <label htmlFor="ppUpload" className="flex items-center gap-2 px-2 py-2 rounded hover:bg-accent cursor-pointer">
-                                        <ImagePlus className="h-4 w-4 text-primary" />
-                                        <span className="text-sm">Change picture</span>
-                                        <input
-                                            className="hidden"
-                                            type="file"
-                                            accept="image/*"
-                                            id="ppUpload"
-                                            onChange={handleEditPP}
-                                        />
-                                    </label>
-                                <AlertDialog>
-                                    <AlertDialogTrigger asChild>
-                                        <button
-                                            type="button"
-                                            className="flex flex-nowrap items-center gap-2 w-full px-2 py-2 rounded hover:bg-accent text-destructive whitespace-nowrap disabled:opacity-50 disabled:cursor-not-allowed"
-                                            disabled={currentUser.photoURL === DEFAULT_PHOTO_URL}
-                                        >
-                                            <Trash2 className="h-4 w-4" />
-                                            <span className="text-sm whitespace-nowrap">Remove picture</span>
-                                        </button>
-                                    </AlertDialogTrigger>
-                                    <AlertDialogContent>
-                                        <AlertDialogHeader>
-                                            <AlertDialogTitle>Remove profile picture?</AlertDialogTitle>
-                                            <AlertDialogDescription>
-                                                Are you sure you want to remove your profile picture? This action cannot be undone and your profile will revert to the default image.
-                                            </AlertDialogDescription>
-                                        </AlertDialogHeader>
-                                        <AlertDialogFooter>
-                                            <AlertDialogCancel>Cancel</AlertDialogCancel>
-                                            <AlertDialogAction className="bg-destructive text-destructive-foreground hover:bg-destructive/90" onClick={handleRemovePP}>
-                                                Remove
-                                            </AlertDialogAction>
-                                        </AlertDialogFooter>
-                                    </AlertDialogContent>
-                                </AlertDialog>
-                                </PopoverContent>
-                            </Popover>
-                            {showCropper && selectedImage && (
-                                <CropperModal
-                                    image={selectedImage}
-                                    onCancel={handleCropCancel}
-                                    onCropComplete={handleCropComplete}
-                                />
-                            )}
-                        </div>
-                    </div>
-
-                    <EditDisplayName label="Display Name" fbkey="displayName" />
-
-                    <div className="rounded-lg bg-secondary p-6">
-                        <div className="flex items-center justify-between">
-                            <div className="space-y-1.5">
-                                <p className="font-medium text-lg">Email</p>
-                                <p className="text-sm text-muted-foreground">
-                                    {currentUser.email}
-                                </p>
                             </div>
-                            <TooltipProvider>
-                                <Tooltip>
-                                    <TooltipTrigger>
-                                        <Lock className="h-4 w-4 text-muted-foreground" />
-                                    </TooltipTrigger>
-                                    <TooltipContent>Edit disabled</TooltipContent>
-                                </Tooltip>
-                            </TooltipProvider>
-                        </div>
-                    </div>
-
-                    <div className="mt-6 flex flex-col md:flex-row gap-4">
-                        <AlertDialog>
-                            <AlertDialogTrigger asChild>
+                        )}
+                        {/* Floating menu button - now top right of avatar */}
+                        <Popover open={popoverOpen} onOpenChange={setPopoverOpen}>
+                            <PopoverTrigger asChild>
                                 <Button
-                                    variant="destructive"
-                                    disabled={isDeleting || isLoggingOut}
-                                    className="w-full"
+                                    variant="secondary"
+                                    size="icon"
+                                    className="absolute top-2 right-2 z-10 shadow-lg"
+                                    aria-label="Profile picture options"
+                                >
+                                    <MoreVertical className="h-5 w-5" />
+                                </Button>
+                            </PopoverTrigger>
+                            <PopoverContent align="end" className="w-40 p-2">
+                                <label htmlFor="ppUpload" className="flex items-center gap-2 px-2 py-2 rounded hover:bg-accent cursor-pointer">
+                                    <ImagePlus className="h-4 w-4 text-primary" />
+                                    <span className="text-sm">Change picture</span>
+                                    <input
+                                        className="hidden"
+                                        type="file"
+                                        accept="image/*"
+                                        id="ppUpload"
+                                        onChange={handleEditPP}
+                                    />
+                                </label>
+                            <AlertDialog>
+                                <AlertDialogTrigger asChild>
+                                    <button
+                                        type="button"
+                                        className="flex flex-nowrap items-center gap-2 w-full px-2 py-2 rounded hover:bg-accent text-destructive whitespace-nowrap disabled:opacity-50 disabled:cursor-not-allowed"
+                                        disabled={currentUser.photoURL === DEFAULT_PHOTO_URL}
+                                    >
+                                        <Trash2 className="h-4 w-4" />
+                                        <span className="text-sm whitespace-nowrap">Remove picture</span>
+                                    </button>
+                                </AlertDialogTrigger>
+                                <AlertDialogContent>
+                                    <AlertDialogHeader>
+                                        <AlertDialogTitle>Remove profile picture?</AlertDialogTitle>
+                                        <AlertDialogDescription>
+                                            Are you sure you want to remove your profile picture? This action cannot be undone and your profile will revert to the default image.
+                                        </AlertDialogDescription>
+                                    </AlertDialogHeader>
+                                    <AlertDialogFooter>
+                                        <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                        <AlertDialogAction className="bg-destructive text-destructive-foreground hover:bg-destructive/90" onClick={handleRemovePP}>
+                                            Remove
+                                        </AlertDialogAction>
+                                    </AlertDialogFooter>
+                                </AlertDialogContent>
+                            </AlertDialog>
+                            </PopoverContent>
+                        </Popover>
+                        {showCropper && selectedImage && (
+                            <CropperModal
+                                image={selectedImage}
+                                onCancel={handleCropCancel}
+                                onCropComplete={handleCropComplete}
+                            />
+                        )}
+                    </div>
+                </div>
+
+                <EditDisplayName label="Display Name" fbkey="displayName" />
+
+                <div className="rounded-lg bg-secondary p-6">
+                    <div className="flex items-center justify-between">
+                        <div className="space-y-1.5">
+                            <p className="font-medium text-lg">Email</p>
+                            <p className="text-sm text-muted-foreground">
+                                {currentUser.email}
+                            </p>
+                        </div>
+                        <TooltipProvider>
+                            <Tooltip>
+                                <TooltipTrigger>
+                                    <Lock className="h-4 w-4 text-muted-foreground" />
+                                </TooltipTrigger>
+                                <TooltipContent>Edit disabled</TooltipContent>
+                            </Tooltip>
+                        </TooltipProvider>
+                    </div>
+                </div>
+
+                <div className="mt-6 flex flex-col gap-4 md:flex-row">
+                    <AlertDialog>
+                        <AlertDialogTrigger asChild>
+                            <Button
+                                variant="destructive"
+                                disabled={isDeleting || isLoggingOut}
+                                className="w-full"
+                            >
+                                {isDeleting ? (
+                                    <>
+                                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                        Deleting...
+                                    </>
+                                ) : (
+                                    <>
+                                        <UserX className="mr-2 h-4 w-4" />
+                                        Delete Account
+                                    </>
+                                )}
+                            </Button>
+                        </AlertDialogTrigger>
+                        <AlertDialogContent>
+                            <AlertDialogHeader>
+                                <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+                                <AlertDialogDescription>
+                                    This action cannot be undone. This will permanently delete your
+                                    account and remove your data from our servers.
+                                    {currentUser.isAnonymous && (
+                                        <p className="mt-2 font-medium text-destructive">
+                                            Note: This is a temporary guest account.
+                                        </p>
+                                    )}
+                                </AlertDialogDescription>
+                            </AlertDialogHeader>
+                            <AlertDialogFooter>
+                                <AlertDialogCancel disabled={isDeleting}>Cancel</AlertDialogCancel>
+                                <AlertDialogAction
+                                    onClick={handleDelAccStart}
+                                    disabled={isDeleting}
+                                    className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
                                 >
                                     {isDeleting ? (
                                         <>
@@ -438,52 +488,47 @@ const Profile = () => {
                                             Deleting...
                                         </>
                                     ) : (
-                                        <>
-                                            <UserX className="mr-2 h-4 w-4" />
-                                            Delete Account
-                                        </>
+                                        "Delete Account"
                                     )}
-                                </Button>
-                            </AlertDialogTrigger>
-                            <AlertDialogContent>
-                                <AlertDialogHeader>
-                                    <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
-                                    <AlertDialogDescription>
-                                        This action cannot be undone. This will permanently delete your
-                                        account and remove your data from our servers.
-                                        {currentUser.isAnonymous && (
-                                            <p className="mt-2 font-medium text-destructive">
-                                                Note: This is a temporary guest account.
-                                            </p>
-                                        )}
-                                    </AlertDialogDescription>
-                                </AlertDialogHeader>
-                                <AlertDialogFooter>
-                                    <AlertDialogCancel disabled={isDeleting}>Cancel</AlertDialogCancel>
-                                    <AlertDialogAction
-                                        onClick={handleDelAccStart}
-                                        disabled={isDeleting}
-                                        className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-                                    >
-                                        {isDeleting ? (
-                                            <>
-                                                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                                                Deleting...
-                                            </>
-                                        ) : (
-                                            "Delete Account"
-                                        )}
-                                    </AlertDialogAction>
-                                </AlertDialogFooter>
-                            </AlertDialogContent>
-                        </AlertDialog>
+                                </AlertDialogAction>
+                            </AlertDialogFooter>
+                        </AlertDialogContent>
+                    </AlertDialog>
 
-                        <AlertDialog>
-                            <AlertDialogTrigger asChild>
-                                <Button
-                                    variant="secondary"
-                                    disabled={isDeleting || isLoggingOut}
-                                    className="w-full"
+                    <AlertDialog>
+                        <AlertDialogTrigger asChild>
+                            <Button
+                                variant="secondary"
+                                disabled={isDeleting || isLoggingOut}
+                                className="w-full"
+                            >
+                                {isLoggingOut ? (
+                                    <>
+                                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                        Logging out...
+                                    </>
+                                ) : (
+                                    <>
+                                        <LogOut className="mr-2 h-4 w-4" />
+                                        Logout
+                                    </>
+                                )}
+                            </Button>
+                        </AlertDialogTrigger>
+                        <AlertDialogContent>
+                            <AlertDialogHeader>
+                                <AlertDialogTitle>Are you sure you want to log out?</AlertDialogTitle>
+                                {currentUser.isAnonymous && (
+                                    <AlertDialogDescription>
+                                        Since this is a temporary account, your account will be deleted if you log out.
+                                    </AlertDialogDescription>
+                                )}
+                            </AlertDialogHeader>
+                            <AlertDialogFooter>
+                                <AlertDialogCancel disabled={isLoggingOut}>Cancel</AlertDialogCancel>
+                                <AlertDialogAction
+                                    onClick={handleLogout}
+                                    disabled={isLoggingOut}
                                 >
                                     {isLoggingOut ? (
                                         <>
@@ -491,43 +536,14 @@ const Profile = () => {
                                             Logging out...
                                         </>
                                     ) : (
-                                        <>
-                                            <LogOut className="mr-2 h-4 w-4" />
-                                            Logout
-                                        </>
+                                        "Log Out"
                                     )}
-                                </Button>
-                            </AlertDialogTrigger>
-                            <AlertDialogContent>
-                                <AlertDialogHeader>
-                                    <AlertDialogTitle>Are you sure you want to log out?</AlertDialogTitle>
-                                    {currentUser.isAnonymous && (
-                                        <AlertDialogDescription>
-                                            Since this is a temporary account, your account will be deleted if you log out.
-                                        </AlertDialogDescription>
-                                    )}
-                                </AlertDialogHeader>
-                                <AlertDialogFooter>
-                                    <AlertDialogCancel disabled={isLoggingOut}>Cancel</AlertDialogCancel>
-                                    <AlertDialogAction
-                                        onClick={handleLogout}
-                                        disabled={isLoggingOut}
-                                    >
-                                        {isLoggingOut ? (
-                                            <>
-                                                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                                                Logging out...
-                                            </>
-                                        ) : (
-                                            "Log Out"
-                                        )}
-                                    </AlertDialogAction>
-                                </AlertDialogFooter>
-                            </AlertDialogContent>
-                        </AlertDialog>
-                    </div>
-                </CardContent>
-            </Card>
+                                </AlertDialogAction>
+                            </AlertDialogFooter>
+                        </AlertDialogContent>
+                    </AlertDialog>
+                </div>
+            </div>
         </div>
     );
 };
