@@ -3,13 +3,15 @@ import { AuthContext } from '../context/AuthContext';
 import { doc, getDoc, onSnapshot } from 'firebase/firestore';
 import { db } from '../firebase';
 import { ChatContext } from '../context/ChatContext';
-import GradientCircularProgress from '../materialUI/GradientCircularProgress';
 import MyAvatar from './MyAvatar';
+import { ScrollArea } from "@/components/ui/scroll-area"
+import { Card, CardContent } from "@/components/ui/card"
+import { UserSearch } from "lucide-react"
 
 const ChatList = ({chatList, setChatList}) => {
     const { currentUser } = useContext(AuthContext);
     const { otherUser, setOtherUser } = useContext(ChatContext);
-    const myCategory = (currentUser.isAnonymous) ? 'guests' : 'users';
+    const myCategory = currentUser.isAnonymous ? 'guests' : 'users';
     const [isLoading, setIsLoading] = useState(false);
 
     useEffect(() => {
@@ -51,33 +53,60 @@ const ChatList = ({chatList, setChatList}) => {
 
     const handleClick = (index) => {
         const selectedUser = chatList[index];
-        console.log('Selected user:', selectedUser);
         setOtherUser(selectedUser);
     }
 
     return (
-        <div className="ChatList flex-1 bg-gradient-to-br from-gray-700 to-gray-950 h-full overflow-y-scroll scrollbar-hidden">
-            {(isLoading) ?
-                <GradientCircularProgress /> :
-                <>
-                    {(chatList.length != 0) ? chatList.map((listItem, index) => (
-                        <div 
-                            key={index} 
-                            onClick={() => handleClick(index)} 
-                            className={`${listItem.uid === otherUser?.uid ? 'bg-gradient-to-r from-[#dd5a5a] to-[#9d1919]' : 'bg-gradient-to-r from-[#004545] to-[#1f7474]'} 
-                            h-[56px] flex flex-row p-2 justify-between overflow-hidden cursor-pointer border-b-[1px] border-b-[#000000]`}
-                        >
-                            <MyAvatar src={listItem.photoURL} width={'40px'} height={'40px'} />
-                            <p className='self-center flex-1'>{listItem.displayName}</p>
-                        </div>
-                    )) : <div className='h-full w-full flex flex-col items-center justify-center p-2'>
-                        <p>Chat with other users by searching their names or Email IDs in the search bar.</p>
-                        <p>Give it a try.</p>
+        <ScrollArea className="h-full">
+            <div className="flex h-full flex-col bg-background">
+                {isLoading ? (
+                    <div className="flex h-full items-center justify-center">
+                        <span className="loading loading-spinner"></span>
                     </div>
-                    }
-                </>
-            }
-        </div>
+                ) : (
+                    <>
+                        {chatList.length > 0 ? (
+                            chatList.map((listItem, index) => (
+                                <div
+                                    key={index}
+                                    onClick={() => handleClick(index)}
+                                    className={`
+                                        flex cursor-pointer items-center gap-3 border-b p-4 transition-colors
+                                        ${listItem.uid === otherUser?.uid
+                                            ? 'bg-primary/10'
+                                            : 'hover:bg-accent'
+                                        }
+                                    `}
+                                >
+                                    <MyAvatar 
+                                        src={listItem.photoURL}
+                                        width="40px"
+                                        height="40px"
+                                    />
+                                    <span className="text-sm font-medium">
+                                        {listItem.displayName}
+                                    </span>
+                                </div>
+                            ))
+                        ) : (
+                            <Card className="m-4 border-dashed">
+                                <CardContent className="flex flex-col items-center justify-center space-y-4 p-6 text-center">
+                                    <UserSearch className="h-12 w-12 text-muted-foreground" />
+                                    <div className="space-y-2">
+                                        <p className="text-sm text-muted-foreground">
+                                            Chat with other users by searching their names or Email IDs in the search bar.
+                                        </p>
+                                        <p className="text-sm font-medium text-primary">
+                                            Give it a try!
+                                        </p>
+                                    </div>
+                                </CardContent>
+                            </Card>
+                        )}
+                    </>
+                )}
+            </div>
+        </ScrollArea>
     );
 }
 

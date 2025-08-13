@@ -1,16 +1,34 @@
 import React, { useContext } from 'react'
 import { ImgContext } from '../context/ImgContext'
-import CloseIcon from '@mui/icons-material/Close';
+import { X } from "lucide-react"
+import { Button } from "@/components/ui/button"
+import {
+    Dialog,
+    DialogContent,
+    DialogTrigger,
+} from "@/components/ui/dialog"
 
 const FullImg = () => {
-
     const { imgUrl, isActive, setIsActive } = useContext(ImgContext);
 
+    const handleClose = () => {
+        setIsActive(false);
+    };
+
     return (
-        <div onClick={() => {setIsActive(false);}} className={`${isActive ? 'flex' : 'hidden'} w-full h-full items-center justify-center bg-inherit backdrop-blur-sm z-50 fixed top-0 right-0 left-0 bottom-0`}>
-            <button onClick={() => {setIsActive(false);}} className='fixed top-2 right-2 z-50'><CloseIcon /></button>
-            <img onClick={(e) => e.stopPropagation()} className='max-w-[90%] max-h-[90%]' src={imgUrl} alt="profile pic" />          
-        </div>
+        <Dialog open={isActive} onOpenChange={handleClose}>
+            <DialogTrigger asChild>
+                <span style={{ display: 'none' }}></span>
+            </DialogTrigger>
+            <DialogContent className="max-w-xl max-h-[90vh] w-full" onClick={(e) => e.stopPropagation()}>
+                <img
+                    src={imgUrl}
+                    alt="Profile picture"
+                    className="mx-auto h-auto max-w-[600px] w-full object-contain"
+                    onClick={(e) => e.stopPropagation()}
+                />
+            </DialogContent>
+        </Dialog>
     )
 }
 

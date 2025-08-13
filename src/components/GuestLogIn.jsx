@@ -2,15 +2,15 @@ import { auth, db } from '../firebase';
 import { signInAnonymously, updateProfile } from 'firebase/auth';
 import { doc, setDoc } from 'firebase/firestore';
 import { useState } from 'react';
-import GradientCircularProgress from '../materialUI/GradientCircularProgress';
 import { useNavigate } from 'react-router-dom';
+import { Button } from "@/components/ui/button";
+import { Separator } from "@/components/ui/separator";
+import { useToast } from "@/hooks/use-toast";
 
 const GuestLogIn = () => {
-
     const [isLoadingGuest, setIsLoadingGuest] = useState(false);
-    const [isErr, setIsErr] = useState(false);
-    const [error, setError] = useState("");
     const navigate = useNavigate();
+    const { toast } = useToast();
 
     const searchNames = [
         'g',    'gu',    'gue',
@@ -22,57 +22,57 @@ const GuestLogIn = () => {
 
     const handleGuestLogin = async () => {
         setIsLoadingGuest(true);
-        signInAnonymously(auth)
-            .then( async (userCredential) => {
-                const user = userCredential.user;
-                console.log(user);
-                console.log(userCredential);
-                setIsLoadingGuest(false);
-                await updateProfile(user, {
-                    displayName: "Guest",
-                    photoURL: "https://firebasestorage.googleapis.com/v0/b/hotchat-nik.appspot.com/o/profilePics%2FDummy.png?alt=media&token=a39fc600-99f7-490d-a670-c23dc37e8d53",
-                }).catch((error) => {
-                    setIsErr(true);
-                    const errorMessage = error.message;
-                    console.log(errorMessage);
-                    setError(errorMessage);
-                });
-                await setDoc(doc(db, "guests", user.uid), {
-                    isAnonymous: true,
-                    uid: user.uid,
-                    displayName: "Guest",
-                    photoURL: "https://firebasestorage.googleapis.com/v0/b/hotchat-nik.appspot.com/o/profilePics%2FDummy.png?alt=media&token=a39fc600-99f7-490d-a670-c23dc37e8d53",
-                    searchNames,
-                }).catch((error) => {
-                    setIsErr(true);
-                    const errorMessage = error.message;
-                    console.log(errorMessage);
-                    setError(errorMessage);
-                });
-                navigate("/");
-            })
-            .catch((error) => {
-                setIsErr(true);
-                const errorMessage = error.message;
-                console.log(errorMessage);
-                setError(errorMessage);
-                setIsLoadingGuest(false);
+        try {
+            const userCredential = await signInAnonymously(auth);
+            const user = userCredential.user;
+            
+            await updateProfile(user, {
+                displayName: "Guest",
+                photoURL: "https://firebasestorage.googleapis.com/v0/b/hotchat-nik.appspot.com/o/profilePics%2FDummy.png?alt=media&token=a39fc600-99f7-490d-a670-c23dc37e8d53",
             });
-    }
+
+            await setDoc(doc(db, "guests", user.uid), {
+                isAnonymous: true,
+                uid: user.uid,
+                displayName: "Guest",
+                photoURL: "https://firebasestorage.googleapis.com/v0/b/hotchat-nik.appspot.com/o/profilePics%2FDummy.png?alt=media&token=a39fc600-99f7-490d-a670-c23dc37e8d53",
+                searchNames,
+            });
+
+            navigate("/");
+        } catch (error) {
+            toast({
+                title: "Error",
+                description: error.message,
+                variant: "destructive",
+            });
+        } finally {
+            setIsLoadingGuest(false);
+        }
+    };
 
     return (
-        <>
-            <div className="p-2 flex items-center gap-2 text-[#61892F]">
-                <div className="h-[1px] bg-[#61892F] grow"></div>
-                <p>or</p>
-                <div className="h-[1px] bg-[#61892F] grow"></div>
+        <div className="space-y-4 w-full">
+            <div className="relative">
+                <div className="absolute inset-0 flex items-center">
+                    <Separator className="w-full" />
+                </div>
+                <div className="relative flex justify-center text-xs uppercase">
+                    <span className="bg-background px-2 text-muted-foreground">
+                        or
+                    </span>
+                </div>
             </div>
-            <button onClick={handleGuestLogin} className='min-w-[232px] rounded-md border border-transparent py-2 px-4 text-base font-semibold font-inherit bg-[#1a1a1a] cursor-pointer transition-border-color duration-250 overflow-hidden text-[#86C232] focus:outline-none focus-visible:ring-4 focus-visible:ring-auto focus-visible:ring-[#86C232] hover:border-[#6a9317]'>
-                {isLoadingGuest ? <GradientCircularProgress /> : <>Guest Log in</>}
-            </button>
-            {isErr && <span>{error}</span>}
-        </>
-    )
-}
+            <Button
+                variant="outline"
+                className="w-full"
+                onClick={handleGuestLogin}
+                disabled={isLoadingGuest}
+            >
+                {isLoadingGuest ? "Logging in..." : "Guest Log in"}
+            </Button>
+        </div>
+    );
+};
 
 export default GuestLogIn;
